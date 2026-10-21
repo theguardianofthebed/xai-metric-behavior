@@ -1,3 +1,60 @@
+# Phase 1 v0.1 — Experimental Specification
+
+## Goal question
+**Under what controlled conditions do quantitative XAI evaluation metrics behave consistently with the explanation property they claim to measure?**
+
+## Oracle 
+### Settings 
+```math
+x=(x_1,\dots,x_{20}),\qquad x_i\sim N(0,1)
+
+y=
+\begin{cases}
+1 & z(x)\ge0\\
+0 & z(x)<0
+\end{cases}
+```
+
+It is set to have 20 features for the predictive model, but 
+```math
+x_6,\ldots,x_{20}
+```
+are noise features.
+
+Through using the simple model like this, we can define oracle explanation.
+For instance, when we set $x_0$ as 0, then the feature contribution of class 1 logit would be:
+```math
+E^*(x)
+=
+[
+2.5x_1,
+-2x_2,
+1.5x_3,
+x_4,
+-0.5x_5,
+0,\ldots,0
+]
+```
+
+And that's basically the oracle explanation, and now we could test if the explanation evaluation metrics do realize when the explanation is corrupted intentionally by experiment setting.
+
+### Task
+```math
+x_j \sim \mathcal N(0,1)
+
+
+z(x)=2.5x_1-2x_2+1.5x_3+x_4-0.5x_5
+```
+
+The classifier outputs logits $[-z, z]$. Features 6–20 are irrelevant to the oracle model.
+
+For the predicted target class:
+```math
+E^*(x)=s_y[w_1x_1,\ldots,w_5x_5,0,\ldots,0]
+```
+
+with $s_y=1$ for class 1 and $-1$ for class 0.
+
 ## F1 — Faithfulness relocation
 
 Suppose the original oracle attribution is:

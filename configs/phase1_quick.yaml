@@ -1,0 +1,90 @@
+experiment:
+  name: phase1_quick
+  random_seed: 42
+  output_dir: results
+  device: cpu
+
+dataset:
+  n_samples: 1000
+  n_features: 20
+  informative_features: 5
+  decoy_start: 5
+  coefficients: [2.5, -2.0, 1.5, 1.0, -0.5]
+
+faithfulness:
+  enabled: true
+  corruption_levels: [0.0, 0.10, 0.25, 0.50, 0.75, 1.0]
+  metric_sample_size: 128
+  metrics:
+    faithfulness_correlation:
+      nr_runs: 25
+      subset_size: 5
+      abs: false
+      normalise: false
+      perturb_baseline: black
+      softmax: false
+    monotonicity_correlation:
+      nr_samples: 25
+      features_in_step: 1
+      abs: true
+      normalise: false
+      perturb_baseline: black
+      softmax: true
+    sensitivity_n:
+      n_max_percentage: 0.50
+      features_in_step: 1
+      abs: false
+      normalise: false
+      perturb_baseline: black
+      softmax: false
+
+compactness:
+  enabled: true
+  support_sizes: [1, 2, 4, 5, 10, 20]
+  concentration_betas: [0.0, 0.10, 0.25, 0.50, 1.0, 2.0]
+  metrics:
+    complexity:
+      abs: true
+      normalise: true
+    sparseness:
+      abs: true
+      normalise: true
+    effective_complexity:
+      eps: 0.00001
+      abs: true
+      normalise: false
+
+robustness:
+  enabled: true
+  instability_levels: [0.0, 0.10, 0.25, 0.50, 0.75, 1.0]
+  metric_sample_size: 32
+  omega: 16.0
+  unstable_mass_ratio: 0.35
+  metrics:
+    avg_sensitivity:
+      nr_samples: 20
+      lower_bound: 0.02
+      abs: false
+      normalise: false
+    max_sensitivity:
+      nr_samples: 20
+      lower_bound: 0.02
+      abs: false
+      normalise: false
+    local_lipschitz:
+      nr_samples: 20
+      perturb_mean: 0.0
+      perturb_std: 0.02
+      abs: false
+      normalise: false
+
+learned_xai:
+  train_fraction: 0.70
+  val_fraction: 0.15
+  hidden_dims: [32, 16]
+  learning_rate: 0.001
+  epochs: 25
+  batch_size: 64
+  methods: [saliency, integrated_gradients, deeplift, gradient_shap]
+  integrated_gradients_steps: 32
+  gradient_shap_samples: 20

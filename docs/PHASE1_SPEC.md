@@ -1,10 +1,43 @@
 # Phase 1 v0.1 — Experimental Specification
 
-## G0
-
+## Goal question
 **Under what controlled conditions do quantitative XAI evaluation metrics behave consistently with the explanation property they claim to measure?**
 
-## Oracle task
+## Oracle 
+### Settings 
+```math
+x=(x_1,\dots,x_{20}),\qquad x_i\sim N(0,1)
+
+```
+```math
+y=
+\begin{cases}
+1 & z(x)\ge0\\
+0 & z(x)<0
+\end{cases}
+```
+It is set to have 20 features for the predictive model, but 
+```math
+x_6,\ldots,x_{20}
+```
+are noise features.
+Through using the simple model like this, we can define oracle explanation.
+For instance, when we set $x_0$ as 0, then the feature contribution of class 1 logit would be:
+```math
+E^*(x)
+=
+[
+2.5x_1,
+-2x_2,
+1.5x_3,
+x_4,
+-0.5x_5,
+0,\ldots,0
+]
+```
+And that's basically the oracle explanation, and now we could test if the explanation evaluation metrics do realize when the explanation is corrupted intentionally by experiment setting.
+
+### Task
 
 ```math
 x_j \sim \mathcal N(0,1)
@@ -26,11 +59,31 @@ with $s_y=1$ for class 1 and $-1$ for class 0.
 
 ## F1 — Faithfulness relocation
 
-Move the first five attribution values to features 6–10, creating a decoy explanation $D(E^*)$
+Suppose the initial attribution:
+```math
+E^*
+=
+[a_1,a_2,a_3,a_4,a_5,0,0,\ldots]
+```
 
+Move the first five attribution values to features 6–10, creating a decoy explanation $D(E^*)$ like:
+
+```math
+D(E^*)
+=
+[0,0,0,0,0,a_1,a_2,a_3,a_4,a_5,0,\ldots]
+```
+
+Then define:
 ```math
 E_\lambda=(1-\lambda)E^*+\lambda D(E^*)
 \]
+```
+
+and tweak the lambda:
+```math
+\lambda =
+0,\;0.1,\;0.25,\;0.5,\;0.75,\;1.0
 ```
 
 Because the supports do not overlap:
@@ -41,11 +94,30 @@ Because the supports do not overlap:
 
 The intervention therefore changes *where* attribution is placed rather than total attribution magnitude.
 
-Metrics:
+For ideal metric, as the corruption $\lambda$ increases, the score of the metric should decrease. But what if the outcomes are not as expected, and also rankings between the metrics mix up?
+That's where we take a look at the response curve per metric. 
+
+Define quality-oriented score of metric $m$ like $Q_m(\lambda)$
+Then define "Degradation Monotonicity Score" like:
+```math
+DMS_m
+=
+-\rho_S
+\left(
+\lambda,Q_m(\lambda)
+\right)
+```
+
+Here $\rho_S$ is spearman correlation. 
+If the metric is ideal (i.e. as the corruption $\lambda$ increases, the score of the metric should decrease), then $DMS\approx1$ should hold. 
+
+Metrics we're testing.
 
 - Faithfulness Correlation
 - Monotonicity Correlation
 - Sensitivity-N
+
+*All metrics are provided by Quantus framework.
 
 ## C1 — Support-size compactness
 

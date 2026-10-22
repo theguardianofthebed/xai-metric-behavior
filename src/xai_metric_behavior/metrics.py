@@ -24,6 +24,55 @@ SPECS = {
     "local_lipschitz": MetricSpec("Local Lipschitz Estimate","robustness","lower"),
 }
 
+def _patch_quantus_tabular_input_size_assert():
+    """
+    Compatibility patch for Quantus 0.6.0.
+
+    Quantus 0.6.0 incorrectly performs an additional x.shape[2:]
+    input-size check for 2D tabular arrays shaped (batch, features),
+    which makes the input size appear as 1.
+
+    This patch only corrects the input-size validation logic.
+    It does not modify any metric computation.
+    """
+    from quantus.helpers import asserts
+
+    # Avoid patching multiple times.
+    if getattr(
+        asserts.assert_value_smaller_than_input_size,
+        "_xai_metric_behavior_patched",
+        False,
+    ):
+        return
+
+    def fixed_assert_value_smaller_than_input_size(
+        x,
+        value,
+        value_name,
+    ):
+        x = np.asarray(x)
+
+        if x.ndim == 2:
+            # Tabular:
+            # (batch, features)
+            input_size = int(np.prod(x.shape[1:]))
+
+        else:
+            # Image / higher-dimensional data:
+            # batch and channel are excluded.
+            input_size = int(np.prod(x.shape[2:]))
+
+        if value >= input_size:
+            raise ValueError(
+                f"'{value_name}' must be smaller than input size. "
+                f"[{value} >= {input_size}]"
+            )
+
+    fixed_assert_value_smaller_than_input_size._xai_metric_behavior_patched = True
+
+    asserts.assert_value_smaller_than_input_size = (
+        fixed_assert_value_smaller_than_input_size
+    )
 
 def build_metric(metric_id, params):
     try:

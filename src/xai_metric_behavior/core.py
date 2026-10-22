@@ -51,15 +51,59 @@ def oracle_attributions(inputs, targets, coefficients) -> np.ndarray:
     return a
 
 
-def relocate_to_decoys(a, level, informative_features, decoy_start) -> np.ndarray:
+def relocate_to_decoys(a, level, informative_features, decoy_start):
+    """
+    Fixed-support faithfulness relocation.
+
+    level determines how many informative attribution values are moved
+    to irrelevant decoy features.
+
+    Example with 5 informative features:
+        level = 0.0 -> move 0
+        level = 0.2 -> move 1
+        level = 0.4 -> move 2
+        ...
+        level = 1.0 -> move 5
+    """
     a = np.asarray(a, dtype=np.float32)
-    if not 0 <= level <= 1:
-        raise ValueError("level must be in [0,1]")
+
+    if not 0.0 <= level <= 1.0:
+        raise ValueError("level must be in [0, 1]")
+
     if decoy_start < informative_features:
         raise ValueError("decoy support overlaps informative support")
-    d = np.zeros_like(a)
-    d[:, decoy_start:decoy_start+informative_features] = a[:, :informative_features]
-    return ((1-level)*a + level*d).astype(np.float32)
+
+    if decoy_start + informative_features > a.shape[1]:
+        raise ValueError("not enough decoy features")
+
+    # Convert corruption level into number of relocated features.
+    r_float = level * informative_features
+    r = int(round(r_float))
+
+    if not np.isclose(r_float, r):
+        raise ValueError(
+            f"level={level} does not correspond to an integer number "
+            f"of relocated features for {informative_features} informative features"
+        )
+
+    # For the oracle experiment, decoy features should initially have zero attribution.
+    decoy_block = a[:, decoy_start:decoy_start + informative_features]
+
+    if not np.allclose(decoy_block, 0.0):
+        raise ValueError(
+            "Decoy features must have zero attribution before relocation."
+        )
+
+    out = a.copy()
+
+    if r == 0:
+        return out
+
+    # Move attribution values, rather than interpolating them.
+    out[:, decoy_start:decoy_start + r] = a[:, :r]
+    out[:, :r] = 0.0
+
+    return out.astype(np.float32)
 
 
 def support_size_explanation(n_features, k) -> np.ndarray:

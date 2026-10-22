@@ -20,13 +20,34 @@ def test_oracle_exactness():
     assert np.allclose(a.sum(1),target_logit,atol=1e-5)
 
 
-def test_faithfulness_intervention_preserves_l1():
-    rng=np.random.default_rng(0)
-    a=np.zeros((10,20),dtype=np.float32)
-    a[:,:5]=rng.normal(size=(10,5))
-    for level in [0,.1,.5,1]:
-        out=relocate_to_decoys(a,level,5,5)
-        assert np.allclose(np.abs(out).sum(1),np.abs(a).sum(1))
+def test_faithfulness_intervention_preserves_l1_and_support():
+    rng = np.random.default_rng(0)
+
+    a = np.zeros((10, 20), dtype=np.float32)
+    a[:, :5] = rng.normal(size=(10, 5))
+
+    original_l1 = np.abs(a).sum(axis=1)
+    original_l0 = np.count_nonzero(a, axis=1)
+
+    for level in [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]:
+        out = relocate_to_decoys(
+            a,
+            level,
+            informative_features=5,
+            decoy_start=5,
+        )
+
+        # Total attribution magnitude must remain unchanged.
+        assert np.allclose(
+            np.abs(out).sum(axis=1),
+            original_l1
+        )
+
+        # Number of non-zero attribution values must remain unchanged.
+        assert np.array_equal(
+            np.count_nonzero(out, axis=1),
+            original_l0
+        )
 
 
 def test_compactness_generators():

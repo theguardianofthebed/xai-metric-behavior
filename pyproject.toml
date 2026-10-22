@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "xai-metric-behavior"
 version = "0.1.0"
 description = "Controlled behavioral evaluation of quantitative XAI metrics."
-requires-python = ">=3.11"
+requires-python = ">=3.12,<3.13"
 dependencies = [
   "numpy>=1.26,<3",
   "pandas>=2.2,<3",

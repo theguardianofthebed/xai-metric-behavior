@@ -80,6 +80,7 @@ def build_metric(metric_id, params):
     except ImportError as e:
         raise ImportError("Install requirements-experiment.txt first.") from e
 
+    _patch_quantus_tabular_input_size_assert()
     p = dict(params)
     p.pop("softmax", None)
     cls = {

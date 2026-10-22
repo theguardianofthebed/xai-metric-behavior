@@ -39,7 +39,7 @@ faithfulness:
       softmax: false
 
 compactness:
-  enabled: true
+  enabled: false
   support_sizes: [1, 2, 4, 5, 10, 20]
   concentration_betas: [0.0, 0.10, 0.25, 0.50, 1.0, 2.0]
   metrics:
@@ -55,7 +55,7 @@ compactness:
       normalise: false
 
 robustness:
-  enabled: true
+  enabled: false
   instability_levels: [0.0, 0.10, 0.25, 0.50, 0.75, 1.0]
   metric_sample_size: 32
   omega: 16.0

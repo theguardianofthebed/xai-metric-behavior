@@ -89,7 +89,11 @@ Use a fresh audit output path. Inspect source identity, scope, failures and skip
 | Tests / separate audit | 27/27 tests and 34/34 audit checks passed; no failures or skips. |
 | Notebook replay | 5/5 unchanged actual code cells ran in a shared Python namespace. `scores.csv`, `population_scores.csv`, and `metric_calls.jsonl` were byte-identical to canonical smoke. |
 
-The notebook setup cell ran but reused the existing checkout/environment. This environment blocked Jupyter kernel startup with `Operation not permitted`; interactive Jupyter and hosted Colab clone/download/UI execution remain **unverified**. The notebook replay is verification of the same experiment, not a second reported result. [Full provenance and notebook record](../results/verification/summary.json)
+The original replay reused an existing environment and missed fresh bootstrap failure. The user subsequently reported Colab cell 1 failing at `venv`; the underlying stderr was not supplied. A local Python without `ensurepip` reproduced that failure and left a partial environment.
+
+**Setup fix, 2026-11-05 KST:** `venv --without-pip` plus kernel `pip --python` creates/repairs only the target environment, with interpreter/isolation/pip checks and captured diagnostics. Fresh creation, real partial recovery and healthy reuse passed. All five updated notebook code cells then passed in a **fresh Python 3.13.11 environment**, including dependency installation and smoke; the same three key files matched canonical bytes and kernel packages stayed unchanged. [Setup verification](../results/verification/colab_setup_validation_2026-11-05.json).
+
+These runs verify the same experiment, not additional research results. Hosted Colab/Jupyter UI and the notebook clone path remain **unverified**; the earlier Jupyter kernel startup was blocked. [Original provenance](../results/verification/summary.json). The bootstrap follows the official [Python venv](https://docs.python.org/3.13/library/venv.html) and [pip target-interpreter](https://pip.pypa.io/en/stable/topics/python-option/) guidance.
 
 Full development and reserved confirmation remain unexecuted.
 

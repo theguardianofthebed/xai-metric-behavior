@@ -69,7 +69,8 @@ Enumeration checks the teaching fixture and first 20-feature input at configured
 | **Observed — near-constant input** | The first attempt's replay guard stopped at input 2 / repeat 1 / A / k=19 / B=5: U varied by only $8.88\times10^{-16}$. Quantus returned **0.31623** with a warning; NumPy replay gave **0.25820**. Preserve the official value and mark it ineligible. [Failure record](../archive/exp01-quantus-first-attempt/). |
 | **Observed — 17 undefined returns** | Constant sampled U or V gives no defined Pearson correlation. Retain NaN and the reason, not a score of zero. |
 | **Verified — adapter/trace checks** | All **588 FC/FE calls** passed structural checks; **576 FC calls** passed recorded-draw pairing checks. Detailed parity classification is in the [audit](QUANTUS_AUDIT.md). |
-| **Notebook code verified; hosted UI unverified** | All five unchanged cells executed in a shared Python namespace, reusing checkout/environment, and reproduced key files byte-for-byte. Kernel startup was blocked. Colab clone/download/UI and interactive Jupyter were not verified. |
+| **Fixed — Colab setup failure** | Cell 1 failed at `venv`, before Quantus. Reproduced locally without `ensurepip`; setup now creates a pipless environment, bootstraps target pip and repairs partial creation. The supplied traceback did not include the underlying stderr. |
+| **Fresh setup verified; hosted UI unverified** | New Python 3.13.11 environment: all five cells and smoke passed; three key files match canonical bytes. Missing-`ensurepip` creation/recovery/reuse also passed. [Record](../results/verification/colab_setup_validation_2026-11-05.json). Hosted Colab/Jupyter UI and notebook clone remain unverified. |
 
 **Eligibility:** preserve every official return; exclude undefined values, exceptions and upstream `NearConstantInputWarning` cases from statistical summaries. A finite return can still be ineligible. The rule was added after the first attempt; samples, scores and the $10^{-10}$ tolerance were preserved.
 
@@ -89,7 +90,7 @@ An enumeration discrepancy under verified premises requires investigating the ca
 
 **Verification:** 27/27 tests and 34/34 audit checks passed. Notebook execution is a verification replay of this smoke, not another research result. [Verification record](../results/verification/summary.json)
 
-**Execute:** Python 3.12, CPU, from the repository root (Linux/Colab). No training, external dataset or GPU is needed.
+**Local CLI:** Python 3.12, CPU, from the repository root (Linux). No training, external dataset or GPU is needed.
 
 ```bash
 python -m venv .venv
@@ -99,7 +100,7 @@ python -m pip install -e .
 python -m xai_metric_behavior run --config configs/exp01_smoke.yaml --output results/exp01-smoke
 ```
 
-[Clone instructions](../README.md#run-on-cpu) · [Open in Colab](https://colab.research.google.com/github/theguardianofthebed/xai-metric-behavior/blob/exp01-atlas-protocol/notebooks/EXP-01.ipynb). Use a new output directory per run. Keep the complete directory: manifest, raw scores, eligibility/failures, public-call records and traces. [Output map](../results/README.md)
+[Clone instructions](../README.md#run-on-cpu) · [Open in Colab](https://colab.research.google.com/github/theguardianofthebed/xai-metric-behavior/blob/exp01-atlas-protocol/notebooks/EXP-01.ipynb). **Colab:** reopen the updated notebook in a CPU runtime and run its cells in order. Cell 1 creates or repairs `.venv` without requiring host `ensurepip`; kernel pip >=22.3 manages only the target environment. The notebook kernel is not upgraded. Use a new output directory per run. Keep the complete directory: manifest, raw scores, eligibility/failures, public-call records and traces. [Output map](../results/README.md)
 
 **Plot axes:** population FC versus k shows the first input; bias/RMSE versus B uses eligible scores. `analysis_ineligible_fraction.png` separates undefined and numerical-instability fractions, each divided by all attempts.
 

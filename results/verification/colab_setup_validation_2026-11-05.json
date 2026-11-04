@@ -1,0 +1,211 @@
+{
+  "report_date_local": "2026-11-05",
+  "report_date_timezone": "Asia/Seoul",
+  "recorded_at_utc": "2026-11-04T23:23:14.032019+00:00",
+  "status": "passed",
+  "purpose": "Regression verification of EXP-01 notebook environment creation; not a new scientific result.",
+  "reported_failure": {
+    "stage": "First code cell: python -m venv",
+    "kernel_family": "Python 3.13 (from user traceback)",
+    "returncode": 1,
+    "underlying_stderr_provided": false,
+    "exact_hosted_colab_cause_confirmed": false
+  },
+  "repair": "Create with --without-pip; kernel pip --python bootstraps only target pip. Verify target prefix, isolation and pip; repair the partial environment without deleting results.",
+  "bootstrap_cases": {
+    "started_at_utc": "2026-11-04T23:20:52.072292+00:00",
+    "notebook_sha256": "00fdbd462b986187b40da33d5ec6bae8d53fd0f525a1194f0648b2073b355c1f",
+    "python": "3.12.3",
+    "tests": [
+      {
+        "case": "fresh-pipless",
+        "setup_output": "Prepare isolated environment\nCheck kernel pip\nBootstrap pip in the isolated environment\nVerify experiment pip\n",
+        "pip": "pip 26.3 from /workspace/scratch/aa90ee89683c/colab-runtime-validation/fresh-pipless/.venv/lib/python3.12/site-packages/pip (python 3.12)",
+        "isolated": true,
+        "status": "passed"
+      },
+      {
+        "case": "partial-recovery",
+        "original_returncode": 1,
+        "original_output": "The virtual environment was not created successfully because ensurepip is not\navailable.  On Debian/Ubuntu systems, you need to install the python3-venv\npackage using the following command.\n\n    apt install python3.12-venv\n\nYou may need to use sudo with that command.  After installing the python3-venv\npackage, recreate your virtual environment.\n\nFailing command: /workspace/scratch/aa90ee89683c/colab-runtime-validation/partial-recovery/.venv/bin/python3.12\n\n",
+        "partial_interpreter_exists": true,
+        "setup_output": "Check kernel pip\nBootstrap pip in the isolated environment\nVerify experiment pip\n",
+        "pip": "pip 26.3 from /workspace/scratch/aa90ee89683c/colab-runtime-validation/partial-recovery/.venv/lib/python3.12/site-packages/pip (python 3.12)",
+        "isolated": true,
+        "status": "passed"
+      },
+      {
+        "case": "healthy-reuse",
+        "setup_output": "Verify experiment pip\n",
+        "pip": "pip 26.3 from /workspace/scratch/aa90ee89683c/colab-runtime-validation/partial-recovery/.venv/lib/python3.12/site-packages/pip (python 3.12)",
+        "isolated": true,
+        "configuration_unchanged": true,
+        "status": "passed"
+      },
+      {
+        "case": "failed-subprocess-diagnostics",
+        "status": "passed"
+      }
+    ],
+    "status": "passed"
+  },
+  "fresh_notebook": {
+    "started_at_utc": "2026-11-04T23:20:52.160588+00:00",
+    "notebook_sha256": "00fdbd462b986187b40da33d5ec6bae8d53fd0f525a1194f0648b2073b355c1f",
+    "schema_valid": true,
+    "fresh_environment": true,
+    "kernel_python": "3.13.11",
+    "execution_mode": "unchanged_code_cells_in_shared_python_namespace",
+    "hosted_colab_ui_verified": false,
+    "interactive_jupyter_verified": false,
+    "cells": [
+      {
+        "cell_index": 2,
+        "status": "passed",
+        "elapsed_seconds": 91.172
+      },
+      {
+        "cell_index": 4,
+        "status": "passed",
+        "elapsed_seconds": 0.001
+      },
+      {
+        "cell_index": 6,
+        "status": "passed",
+        "elapsed_seconds": 10.607
+      },
+      {
+        "cell_index": 8,
+        "status": "passed",
+        "elapsed_seconds": 0.043
+      },
+      {
+        "cell_index": 10,
+        "status": "passed",
+        "elapsed_seconds": 0.035
+      }
+    ],
+    "kernel_packages_before": {
+      "referencing": "0.37.0",
+      "wcwidth": "0.9.4",
+      "nbformat": "5.11.1",
+      "ptyprocess": "0.7.0",
+      "traitlets": "5.16.1",
+      "pexpect": "4.9.0",
+      "executing": "2.3.0",
+      "psutil": "7.2.2",
+      "fastjsonschema": "2.22.3",
+      "parso": "0.8.7",
+      "jedi": "0.20.1",
+      "Pygments": "2.21.0",
+      "jupyter_core": "5.9.1",
+      "pure_eval": "0.2.4",
+      "platformdirs": "4.14.5",
+      "matplotlib-inline": "0.2.2",
+      "ipython_pygments_lexers": "1.1.1",
+      "attrs": "26.1.0",
+      "numpy": "2.3.5",
+      "jsonschema": "4.26.0",
+      "stack-data": "0.6.3",
+      "ipython": "9.18.1",
+      "jsonschema-specifications": "2025.9.1",
+      "rpds-py": "2026.9.1",
+      "asttokens": "3.0.2",
+      "pip": "26.3",
+      "prompt_toolkit": "3.0.53"
+    },
+    "run_id": "9ff3f4bccab5e3ad",
+    "git": {
+      "commit": "19f0bd6793ac0486f26e93631cfab694288379b9",
+      "branch": "exp01-atlas-protocol",
+      "tracked_worktree_dirty": true
+    },
+    "runtime": {
+      "python": "3.13.11",
+      "platform": "Linux-6.18.57-x86_64-with-glibc2.39",
+      "packages": {
+        "numpy": "2.3.5",
+        "scipy": "1.17.0",
+        "PyYAML": "6.0.3",
+        "matplotlib": "3.10.8",
+        "quantus": "0.6.0",
+        "torch": "2.10.0+cpu"
+      }
+    },
+    "implementation_sha256": "607491892e16bae9b6bb277c7e1b0ae683fef19933e01ef841d2af8d46d25ba1",
+    "backend_execution_sha256": "24b1a68fa955ca392d0678147348536e653b9347d2dfb7eae619c1146582f96b",
+    "counts": {
+      "n_inputs": 4,
+      "repetitions_per_input": 4,
+      "n_planned_scores": 576,
+      "n_attempted_scores": 576,
+      "n_valid_scores": 559,
+      "n_nonfinite_scores": 17,
+      "n_official_finite_scores": 559,
+      "n_analysis_eligible_scores": 555,
+      "n_numerically_unstable_scores": 4,
+      "n_undefined_scores": 17,
+      "n_exception_scores": 0,
+      "n_exceptions": 0,
+      "n_failures_logged": 21,
+      "n_public_FC_calls": 576,
+      "n_public_FE_calls": 12,
+      "n_FE_official_finite": 12,
+      "n_FE_analysis_eligible": 12,
+      "n_FE_numerically_unstable": 0,
+      "n_FE_undefined": 0,
+      "n_trace_checks_passed": 588,
+      "n_pairing_checks_passed": 576,
+      "n_score_parity_passed": 584,
+      "n_score_parity_deferred_near_constant": 4,
+      "n_warning_records": 21
+    },
+    "validation": {
+      "enumeration_comparisons": 16,
+      "enumeration_all_passed": true,
+      "max_enumeration_absolute_error": 5.329070518200751e-15,
+      "max_singleton_FE_coordinate_error_eligible_inputs": 3.3306690738754696e-16,
+      "max_singleton_FE_coordinate_error_all_finite": 3.3306690738754696e-16,
+      "max_fixed_pair_margin_identity_error": 6.661338147750939e-16,
+      "numerical_tolerance": 1e-10,
+      "d20_enumeration_scope": "first input at configured subset sizes only",
+      "max_eligible_exact_anchor_error": 5.551115123125783e-16,
+      "max_public_trace_replay_absolute_error_all_diagnostics": 0.058028876269677176,
+      "max_stable_public_trace_replay_absolute_error": 1.1102230246251565e-15,
+      "actual_pairing_checks": 576,
+      "all_FC_calls_paired": true,
+      "public_FE_calls": 12,
+      "all_public_calls_trace_checked": true,
+      "all_public_calls_score_parity_classified": true
+    },
+    "output_directory": "/workspace/scratch/aa90ee89683c/xai-colab-fix/results/exp01-smoke-20261104T232223_349343Z",
+    "matches_canonical_cli_bytes": {
+      "scores.csv": true,
+      "population_scores.csv": true,
+      "metric_calls.jsonl": true
+    },
+    "kernel_packages_unchanged": true,
+    "status": "passed",
+    "finished_at_utc": "2026-11-04T23:22:34.047561+00:00"
+  },
+  "verification_method": {
+    "bootstrap": "Execute the unchanged environment-preparation AST nodes from notebook cell 2, before scientific package installation, in a separate Python 3.12.3 kernel whose base interpreter has no ensurepip. Check fresh creation, a real failed default-venv partial environment, healthy reuse and stderr diagnostics.",
+    "fresh_notebook": "Start a separate Python 3.13.11 kernel with pip, NumPy, IPython and nbformat; use an existing repository checkout with no .venv; validate notebook schema and execute all five unchanged code cells in one namespace, including new dependency downloads and smoke. Compare kernel package inventory before/after and key files with canonical smoke."
+  },
+  "key_output_sha256": {
+    "scores.csv": "fe27904200c1b8520adb2e74929284cb2583a1cd5f00bc7db3b04e4dcc60d3af",
+    "population_scores.csv": "e593fed46b3a68b51ca7f0188ab50fafd89c90f60bba14f0229dc701af1fda09",
+    "metric_calls.jsonl": "2cf125e9ed32a2c7521e362a9b935ce6b99e466685cc5713d4d3db17fea2b70b"
+  },
+  "scope_limits": [
+    "Hosted Colab UI and interactive Jupyter were not exercised.",
+    "The user traceback does not establish the exact missing-ensurepip cause on their particular runtime; that mechanism was reproduced locally.",
+    "Fresh clone inside the notebook was not exercised; an existing isolated checkout was used.",
+    "The 27-test/34-audit historical suite was not rerun for this notebook-only compatibility change. No scientific source, configuration, seed or pin changed.",
+    "Full development and reserved confirmation remain unexecuted."
+  ],
+  "references": [
+    "https://docs.python.org/3.13/library/venv.html",
+    "https://pip.pypa.io/en/stable/topics/python-option/"
+  ]
+}

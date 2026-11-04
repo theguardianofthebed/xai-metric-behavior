@@ -77,13 +77,13 @@ For a fixed input and explanation:
 ```math
 U_S=\sum_{j\in S}a_j,\qquad
 V_S=g(x)-g(x_{S\leftarrow b}),\qquad
-\widehat{FC}_B=\operatorname{Corr}_{r=1}^{B}(U_{S_r},V_{S_r}).
+\widehat{FC}_B=\mathrm{Corr}_{r=1}^{B}(U_{S_r},V_{S_r}).
 ```
 
 Additivity gives $V_S=\sum_{j\in S}v_j$. Uniform fixed-size selection gives subset covariance equal to the centered coordinate cross-product sum times $k(d-k)/[d(d-1)]$. Both subset variances use the same factor times their respective centered squared sums. Pearson divides covariance by the two standard deviations, so the factor cancels:
 
 ```math
-FC_{\rm pop}(k)=\operatorname{Corr}_{j=1}^{d}(a_j,v_j),\qquad 1\leq k<d.
+FC_{\rm pop}(k)=\mathrm{Corr}_{j=1}^{d}(a_j,v_j),\qquad 1\leq k<d.
 ```
 
 This is the project's [HYP-01 derivation](ATLAS_REFERENCE.md#hyp-01), not a theorem attributed to the metric's definition paper. It applies to arbitrary supplied $a$ under the assumptions, including the two nonexact candidates and additive nonlinear models. It excludes constant vectors, $k=0$, and $k=d$.
@@ -241,7 +241,7 @@ These records establish a working implementation and identify the checks perform
 
 - **필요성:** subset 크기에 따른 측정값 변화와 적은 추출 횟수 때문에 생긴 추정 오차를 구분해야 한다.
 - **직관적인 예시/이해:** 모든 가능한 subset을 계산한 점수는 같아도, 그중 일부만 뽑으면 점수가 다르게 나올 수 있다.
-- **공식적인 정의:** $FC_{\rm pop}=\operatorname{Corr}_S(U_S,V_S)$; $\widehat{FC}_B$는 $B$개 추출 결과의 Pearson correlation이다.
+- **공식적인 정의:** $FC_{\rm pop}=\mathrm{Corr}_S(U_S,V_S)$; $\widehat{FC}_B$는 $B$개 추출 결과의 Pearson correlation이다.
 - **근거/그게 되는 이유:** additive model과 uniform fixed-size sampling에서는 공분산과 두 분산에 같은 계수가 곱해져 population correlation에서 상쇄된다. 유한 표본의 비선형 추정 오차까지 사라지는 것은 아니다.
 
 ### Exact anchor and two nonexact candidates

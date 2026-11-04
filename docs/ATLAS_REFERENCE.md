@@ -1,6 +1,6 @@
 # Atlas source reference
 
-This is the readable design snapshot of **XAI Metric Behavior — Framework & Experiments**, revision **4**, retrieved on **4 November 2026**. All 45 element summaries and author-written English sections are preserved. Heading levels are shifted only to nest them within this document. Original evidence labels and future tense are retained; statements that a protocol was unexecuted describe this source snapshot. Current implementation and run evidence are added separately in [EXP-01](EXP-01.md).
+This is the readable design snapshot of **XAI Metric Behavior — Framework & Experiments**, revision **4**, retrieved on **4 November 2026**. All 45 element summaries and author-written English sections are preserved. Heading levels and equivalent TeX formatting are adjusted for GitHub display; the original notation remains in the JSON snapshot. Original evidence labels and future tense are retained; statements that a protocol was unexecuted describe this source snapshot. Current implementation and run evidence are added separately in [EXP-01](EXP-01.md).
 
 The [JSON snapshot](atlas_snapshot_2026-11-04.json) also retains all 162 connections, settings, stable IDs, and source references. This is a fixed design baseline, not a live synchronization feed. The [framework guide](FRAMEWORK.md) offers a shorter reading path.
 
@@ -466,7 +466,7 @@ Here m identifies the metric; E is the supplied explanation; g is the scalar mod
 For a fixed-size subset evaluator, one useful representation is:
 
 ```math
-\theta:\quad S_r\sim\operatorname{Uniform}\{S\subseteq\{1,\ldots,d\}:|S|=k\},
+\theta:\quad S_r\sim\mathrm{Uniform}\{S\subseteq\{1,\ldots,d\}:|S|=k\},
 \quad r=1,\ldots,B,
 \qquad
 \xi=(S_1,\ldots,S_B).
@@ -917,8 +917,8 @@ V_S=g(x)-g(x_{S\leftarrow b}),\qquad |S|=k.
 ```
 
 ```math
-FC_{\mathrm{pop}}=\operatorname{Corr}_{S}(U_S,V_S),\qquad
-\widehat{FC}_{B}=\operatorname{Corr}_{r=1}^{B}(U_{S_r},V_{S_r}).
+FC_{\mathrm{pop}}=\mathrm{Corr}_{S}(U_S,V_S),\qquad
+\widehat{FC}_{B}=\mathrm{Corr}_{r=1}^{B}(U_{S_r},V_{S_r}).
 ```
 
 The pinned Quantus v0.6.0 routine, freshly inspected at the commit cited below, samples coordinates without replacement within each subset and resamples subsets across runs. With the default replacement function, each perturbed input starts from the original input. `perturb_func` determines the intervention; `similarity_func` determines the comparison. Changing either can change the evaluated construct or create a metric variant.
@@ -961,7 +961,7 @@ In the proposed singleton configuration, `features_in_step=1`, signed attributio
 
 ```math
 v_j=g(x)-g(x_{j\leftarrow b_j}),\qquad
-FE(a;x,b)=\operatorname{Corr}_{j=1}^{d}(a_j,v_j).
+FE(a;x,b)=\mathrm{Corr}_{j=1}^{d}(a_j,v_j).
 ```
 
 The pinned Quantus v0.6.0 implementation, freshly inspected at the commit cited below, sorts attributions before forming nonoverlapping groups. With the default replacement function, each group is replaced in the original input; deletion is not cumulative. Singleton sorting only reorders paired observations, leaving correlation unchanged. With deterministic inference and baseline replacement, this configuration has no subset-sampling uncertainty.
@@ -1162,7 +1162,7 @@ E_j^{(q)}=w_j(x_j-b_{q,j}),\qquad q\in\{0,1\}.
 | `E^(1)` | Mismatched: FC = r01, R = R01 | Matched: FC = 1, R = 0 |
 
 ```math
-r_{01}=\operatorname{Corr}_{j}(E_j^{(0)},E_j^{(1)}),\qquad
+r_{01}=\mathrm{Corr}_{j}(E_j^{(0)},E_j^{(1)}),\qquad
 R_{01}=\mathbb{E}_{S}\left[\sum_{j\in S}
 (E_j^{(0)}-E_j^{(1)})\right]^2.
 ```
@@ -1389,7 +1389,7 @@ U_S=\sum_{j\in S}a_j,\quad V_S=\sum_{j\in S}v_j.
 For the coordinate inclusion indicators, sampling without replacement produces:
 
 ```math
-\operatorname{Cov}_{S}(U_S,V_S)=
+\mathrm{Cov}_{S}(U_S,V_S)=
 \frac{k(d-k)}{d(d-1)}
 \sum_{j=1}^{d}(a_j-\bar a)(v_j-\bar v).
 ```
@@ -1398,7 +1398,7 @@ Applying the same identity to both variances cancels the positive common factor:
 
 ```math
 FC_{\mathrm{pop}}(a;x,b,k)=
-\operatorname{Corr}_{j=1}^{d}(a_j,v_j).
+\mathrm{Corr}_{j=1}^{d}(a_j,v_j).
 ```
 
 Require positive centered sums of squares for both vectors. The equality applies to arbitrary supplied explanations, including controlled corruptions, and to nonlinear coordinate functions `h_j`; linearity of the entire target is unnecessary. At `k=0` or `k=d`, the subset response is constant and Pearson is undefined. A constant explanation or effect vector is likewise outside the nondegenerate domain.
@@ -1452,10 +1452,10 @@ Under HYP-01's uniform fixed-size sampling conditions, population FC is the coor
 
 ```math
 FC_{\mathrm{pop}}=
-\frac{\operatorname{Var}_j(a)+\operatorname{Cov}_j(a,q)}
-{\sqrt{\operatorname{Var}_j(a)
-[\operatorname{Var}_j(a)+2\operatorname{Cov}_j(a,q)+
-\operatorname{Var}_j(q)]}}.
+\frac{\mathrm{Var}_j(a)+\mathrm{Cov}_j(a,q)}
+{\sqrt{\mathrm{Var}_j(a)
+[\mathrm{Var}_j(a)+2\mathrm{Cov}_j(a,q)+
+\mathrm{Var}_j(q)]}}.
 ```
 
 Both denominator variances must be positive. A raw baseline distance does not determine this value: feature weights, the input-relative attribution pattern, and covariance matter. If evaluator effects are a positive affine transformation of the explanation vector, correlation remains one. A common coordinate shift in the effect vector is a special case; a common shift of the raw baseline does not generally produce that special case when weights differ.
@@ -1622,9 +1622,9 @@ Keep the model, input, explanation, and evaluator settings fixed when estimating
 Where these moments exist, define estimator bias and variance relative to the population metric M∞:
 
 ```math
-\operatorname{Bias}_\xi = \mathbb E_\xi[\widehat M_B]-M_\infty,
+\mathrm{Bias}_\xi = \mathbb E_\xi[\widehat M_B]-M_\infty,
 \qquad
-\operatorname{Var}_\xi = \operatorname{Var}_\xi(\widehat M_B).
+\mathrm{Var}_\xi = \mathrm{Var}_\xi(\widehat M_B).
 ```
 
 Use analytic values or exact enumeration when available. Without such a reference, repetitions estimate variability rather than the realized estimation error or bias. Increasing budget B does not guarantee that every score moves toward an ideal value. In particular, finite-sample correlation can exhibit bias, variable precision, and zero-variance failures.
@@ -1808,9 +1808,9 @@ For different subset sizes k, use a common random permutation for each draw and 
 If selection is explanation-dependent by definition, couple primitive randomness while applying each arm's own selector; imposing identical masks could change the metric. When a valid coupling is unavailable, use an explicitly unpaired comparison with its corresponding uncertainty analysis. A common seed alone does not guarantee matching if execution paths consume randomness differently.
 
 ```math
-\operatorname{Var}(\widehat M_A-\widehat M_B)
-=\operatorname{Var}(\widehat M_A)+\operatorname{Var}(\widehat M_B)
--2\operatorname{Cov}(\widehat M_A,\widehat M_B).
+\mathrm{Var}(\widehat M_A-\widehat M_B)
+=\mathrm{Var}(\widehat M_A)+\mathrm{Var}(\widehat M_B)
+-2\mathrm{Cov}(\widehat M_A,\widehat M_B).
 ```
 
 Positive covariance reduces comparison variance; pairing does not guarantee this in every setting. Use independent plans between repetitions and fresh streams for confirmation, while preserving within-repetition pairing. Record draw identities, coupling rules, and any law violations in the provenance manifest.

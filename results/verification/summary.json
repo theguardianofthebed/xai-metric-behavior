@@ -61,7 +61,7 @@
     "Jupyter kernel TCP and IPC socket binding denied by execution environment; actual code cells validated sequentially in ordinary Python, UI remains unverified."
   ],
   "publication": {
-    "status": "branch_created_pr_pending",
+    "status": "pull_request_open",
     "target_branch": "exp01-atlas-protocol",
     "initial_setup_incident": {
       "status": "resolved",
@@ -70,7 +70,9 @@
     },
     "source_commit_scope": "source_commit records the local verification checkout; published_source_commit identifies the identical source tree on GitHub",
     "remote_branch_created": true,
-    "pull_request_created": false
+    "pull_request_created": true,
+    "pull_request_url": "https://github.com/theguardianofthebed/xai-metric-behavior/pull/1",
+    "verification_commit": "585cca76356bcd71e3fddb5e7178f2a0ca4f0494"
   },
   "published_source_commit": "808bbdd5c55a89b38ee60b0cc447262f67535c19",
   "source_tree": "646df28ef4597a57e137e97a77505793478f486e"

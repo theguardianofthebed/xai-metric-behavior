@@ -4,6 +4,8 @@
 
 This report connects the Atlas design to the runnable experiment. The original protocol below is copied from **EXP-01 Details, Atlas revision 4**. Implementation choices and execution evidence are separate additions; the complete [source context](ATLAS_REFERENCE.md#exp-01) and [framework](FRAMEWORK.md) remain available.
 
+**Implementation review:** [PR #1](https://github.com/theguardianofthebed/xai-metric-behavior/pull/1) contains the runnable setup and verification evidence. Full development and confirmation remain unexecuted.
+
 ### Atlas protocol
 
 Start with a deterministic additive scalar target, including a sparse linear case. Declare a baseline before subset selection and sample uniformly among all subsets of each fixed size. Keep `1 <= k < d`. Hold the explanation fixed while varying `k` and the within-input perturbation budget `B`. The number of evaluated inputs is a separate design dimension.

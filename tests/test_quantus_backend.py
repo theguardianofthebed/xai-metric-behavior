@@ -67,6 +67,7 @@ class PublicQuantusBackendTests(unittest.TestCase):
                 public_call.assert_called_once()
                 self.assert_recorded(result)
                 self.assertTrue(result.valid, result.reason)
+                self.assertTrue(result.analysis_eligible, result.reason)
                 self.assertAlmostEqual(result.score, 1.0, places=12)
                 np.testing.assert_array_equal(result.trace["model_inputs"][0], self.x)
                 self.assertEqual(result.trace["model_inputs"].dtype, np.float64)
@@ -128,6 +129,7 @@ class PublicQuantusBackendTests(unittest.TestCase):
         self.assertFalse(result.valid)
         self.assertTrue(np.isnan(result.score))
         self.assertEqual(result.reason, "constant_response")
+        self.assertFalse(result.analysis_eligible)
         np.testing.assert_array_equal(result.trace["V"], np.zeros(25))
         self.assertGreater(np.ptp(result.trace["U"]), 0)
         self.assertTrue(any(w["category"] == "ConstantInputWarning" for w in result.warnings),
@@ -145,6 +147,33 @@ class PublicQuantusBackendTests(unittest.TestCase):
         self.assertTrue(np.isnan(result.score))
         self.assertIn("subset_size", result.exception)
         self.assertTrue(result.reason.startswith("exception:"))
+
+    def test_recorded_near_constant_smoke_value_is_preserved_but_ineligible(self):
+        # Captured from first official attempt, source 02cd3d2, call 344:
+        # input 2, repetition 1, candidate A, k=19, B=5. Literal inputs make
+        # this independent of later result files or generator refactoring.
+        x = np.array([0.9289979736951923, -1.4621129036211873, -0.32088905891569236, 0.33162073351301047, 0.5362366220559647, -0.16397913503256398, 0.9537486395213012, -0.09966578548825879, 1.5796151188185499, 1.9021361539137442, -0.40496696757653317, 0.3346197102928255, 1.3991829271685752, 1.4119256038002874, -0.38587986033628946, -1.870462549453295, -1.1831467759926897, 0.46111968314396323, -0.012310808861654783, 0.17776035714289476], dtype=np.float64)
+        attribution = np.array([-0.0, 2.9242258072423746, -0.48133358837353857, 0.33162073351301047, -0.26811831102798234, 2.322494934237981, 0.0, -0.0, 0.0, 0.0, -0.0, 0.0, 0.0, 0.0, -0.0, -0.0, -0.0, 0.0, -0.0, 0.0], dtype=np.float64)
+        seed = backend.evaluator_seed_words(2026110402, 0, 2, 1)
+        result = backend.public_score("FC", x, self.weights, attribution, seed,
+                                      subset_size=19, budget=5)
+        self.assert_recorded(result)
+        self.assertTrue(result.valid)  # The official return really is finite.
+        self.assertEqual(result.score, 0.31622776601683805)
+        self.assertFalse(result.analysis_eligible)
+        self.assertEqual(result.reason, "near_constant_input")
+        self.assertTrue(any(w["category"] == "NearConstantInputWarning" for w in result.warnings))
+        self.assertTrue(result.checks["near_constant_warning"])
+        self.assertEqual(result.checks["score_parity_status"], "not_asserted_near_constant")
+        self.assertAlmostEqual(result.checks["trace_replay_absolute_error"],
+                               abs(result.score - 0.2581988897471609), places=14)
+        self.assertGreater(result.checks["trace_replay_absolute_error"], 1e-10)
+        self.assertTrue(result.checks["input_exactly_preserved"])
+        self.assertTrue(result.checks["original_replacement_verified"])
+        np.testing.assert_array_equal(result.trace["model_inputs"][0], x)
+        self.assertEqual(result.trace["subsets"].shape, (5, 19))
+        self.assertEqual(np.ptp(result.trace["U"]), 8.881784197001252e-16)
+        self.assertGreater(np.ptp(result.trace["V"]), 0)
 
 
 if __name__ == "__main__":

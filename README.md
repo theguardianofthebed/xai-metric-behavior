@@ -2,7 +2,7 @@
 
 **When and why do quantitative XAI metrics change their judgments?**
 
-EXP-01 keeps explanations fixed and changes the evaluator's **subset size** $k$ and **sampling budget** $B$. Under the declared additive model, population Faithfulness Correlation (FC) is independent of $k$. A finite estimate can still fluctuate or be undefined. The experiment separates these effects using a known model, two fixed nonexact candidates, and an exact anchor.
+EXP-01 keeps explanations fixed and changes the evaluator's **subset size** $k$ and **sampling budget** $B$. Under the declared additive model, population Faithfulness Correlation (FC) is independent of $k$. A finite estimate can fluctuate, be undefined, or be numerically unstable. The experiment separates these effects using a known model, two fixed nonexact candidates, and an exact anchor.
 
 **Quantus 0.6.0 public FC/FE calls are the measurement engine.** The NumPy formula and exhaustive checks supply analytical references; trace replay checks that the official calculations obey the declared contract. Parity is an implementation guard, not a result about explanation quality.
 
@@ -40,6 +40,6 @@ The [live XAI Framework Atlas](https://timecapsule-traceability-atlas.iamlim0619
 
 ## Current evidence and boundaries
 
-**Fresh Quantus smoke verification is pending.** This paragraph will be replaced only from the new recorded run. Earlier NumPy-engine results are preserved in [archive/exp01-numpy](archive/exp01-numpy/); the original Phase 1 scaffold remains in [archive/phase1](archive/README.md). Neither is relabeled as a Quantus experiment.
+**Completed Quantus rerun verification is pending.** The [failure report](docs/EXP-01.md#5-limitations--failure-report) records the first attempt's near-constant case: its official finite score is preserved and excluded from analysis, with the warning and denominator retained. Earlier NumPy-engine results are preserved in [archive/exp01-numpy](archive/exp01-numpy/); the original Phase 1 scaffold remains in [archive/phase1](archive/README.md). Neither is relabeled as a Quantus experiment.
 
 **Derived**, **implemented**, **observed**, **proposed**, and **unverified** are different evidence states. The initial synthetic Faithfulness study does not establish a universal metric or transfer to real data. Compactness and Robustness/Continuity need their own measurement contracts.

@@ -303,7 +303,7 @@ def run_experiment(
         "runtime": _runtime(), "metric_variant": METRIC_VARIANT,
         "library_execution": "Official Quantus 0.6.0 public FC/FE returns; NumPy is reference/trace verification only.",
         "backend_execution_sha256": backend["execution_sha256"], "quantus_backend": backend,
-        "atlas": {"id": "3973d962-747e-45ef-b05c-18dd541358d9", "source_revision": 8,
+        "atlas": {"id": "3973d962-747e-45ef-b05c-18dd541358d9", "source_revision": 9,
                   "snapshot_sha256": file_hash(snapshot) if snapshot.exists() else None},
         "rng": {"input_generator": "PCG64", "evaluator_generator": "Quantus native NumPy legacy MT19937",
                 "seed_roots": config["seeds"],
@@ -315,15 +315,23 @@ def run_experiment(
                      "baseline": 0.0, "signed": True, "abs": False, "normalise": False,
                      "selection": "uniform size-k without replacement within draw; independent draws",
                      "comparator": "Pearson", "direction": "higher", "aggregation": "equal-weight inputs after within-input repetitions",
-                     "undefined": "retained as NaN with reasons; contrasts condition on joint validity",
+                     "undefined": "official nonfinite returns retained with reasons and all-attempt denominators",
+                     "analysis_eligibility": "finite official return, no exception, and no upstream NearConstantInputWarning",
+                     "numerical_instability": "preserve official score/error; exclude warned calls from conditional estimation/ranking; retain counts",
+                     "counts": "n_valid_scores aliases official finiteness; undefined and numerical-instability reason counts may overlap",
                      "pair_A_swaps": [[0, 5]], "pair_B_swaps": [[0, 5], [1, 6]], "indexing": "zero_based"},
         "confirmation_freeze": freeze,
         "counts": {"n_inputs": config["n_inputs"], "repetitions_per_input": config["repetitions"],
                    "n_planned_scores": config["n_inputs"] * config["repetitions"] * len(config["subset_sizes"]) * len(config["budgets"]) * 3,
                    "n_attempted_scores": 0, "n_valid_scores": 0, "n_nonfinite_scores": 0,
+                   "n_official_finite_scores": 0, "n_analysis_eligible_scores": 0,
+                   "n_numerically_unstable_scores": 0, "n_undefined_scores": 0,
                    "n_exception_scores": 0, "n_exceptions": 0, "n_failures_logged": 0,
                    "n_public_FC_calls": 0, "n_public_FE_calls": 0,
+                   "n_FE_official_finite": 0, "n_FE_analysis_eligible": 0,
+                   "n_FE_numerically_unstable": 0, "n_FE_undefined": 0,
                    "n_trace_checks_passed": 0, "n_pairing_checks_passed": 0,
+                   "n_score_parity_passed": 0, "n_score_parity_deferred_near_constant": 0,
                    "n_warning_records": 0},
         "interpretation": "Population theorem under declared premises; finite estimates and illustrative budget choices do not establish universal metric reliability.",
     }
@@ -332,6 +340,7 @@ def run_experiment(
     failures: list[dict[str, Any]] = []
     call_index = 0
     max_trace_error = 0.0
+    max_stable_trace_error = 0.0
 
     def invoke(kind: str, input_id: int, explanation: str, x_value: np.ndarray,
                attribution: np.ndarray, seed_words: np.ndarray, *,
@@ -351,7 +360,7 @@ def run_experiment(
                     seed_words: np.ndarray, *, repetition: int | None = None,
                     k: int | None = None, budget: int | None = None,
                     guard_error: str | None = None, pairing_verified: bool = False) -> str | None:
-        nonlocal call_index, max_trace_error
+        nonlocal call_index, max_trace_error, max_stable_trace_error
         call_index += 1
         exception = result.exception or guard_error
         trace_path = None
@@ -364,9 +373,16 @@ def run_experiment(
                                    if value is not None})
         if result.checks:
             manifest["counts"]["n_trace_checks_passed"] += 1
+            parity_status = result.checks.get("score_parity_status")
+            if parity_status == "passed":
+                manifest["counts"]["n_score_parity_passed"] += 1
+            elif parity_status == "not_asserted_near_constant":
+                manifest["counts"]["n_score_parity_deferred_near_constant"] += 1
             discrepancy = result.checks.get("trace_replay_absolute_error")
             if discrepancy is not None:
                 max_trace_error = max(max_trace_error, float(discrepancy))
+                if parity_status == "passed":
+                    max_stable_trace_error = max(max_stable_trace_error, float(discrepancy))
         if pairing_verified:
             manifest["counts"]["n_pairing_checks_passed"] += 1
         manifest["counts"]["n_warning_records"] += len(result.warnings)
@@ -377,7 +393,9 @@ def run_experiment(
             "k": k, "budget": budget, "seed_words": seed_words.tolist(),
             "score": float(result.score) if np.isfinite(result.score) else None,
             "raw_score_repr": repr(float(result.score)),
-            "valid": bool(result.valid and exception is None),
+            "valid": bool(np.isfinite(result.score)),
+            "analysis_eligible": bool(result.analysis_eligible and exception is None),
+            "numerical_instability": any(item["category"] == "NearConstantInputWarning" for item in result.warnings),
             "reason": result.reason if guard_error is None else "exception:trace_pairing",
             "exception": exception, "checks": result.checks,
             "pairing_verified": pairing_verified,
@@ -401,7 +419,7 @@ def run_experiment(
         np.savez_compressed(output / "inputs.npz", x=x, weights=weights, baseline=baseline,
                             explanations=stacked, explanation_names=np.array(EXPLANATION_NAMES))
         population = np.full((n, len(EXPLANATION_NAMES)), np.nan)
-        population_rows, max_fe_error, max_margin_error = [], 0.0, 0.0
+        population_rows, max_fe_error, max_fe_error_all_finite, max_margin_error = [], 0.0, 0.0, 0.0
         tolerance = config["analysis"]["numerical_tolerance"]
         for i in range(n):
             v = candidates["exact"][i]
@@ -418,13 +436,25 @@ def run_experiment(
                 fe_seed = evaluator_seed_words(config["seeds"]["evaluator"], PHASE_IDS[config["phase"]], i, 0)
                 fe = invoke("FE", i, explanation, x[i], stacked[i, ei], fe_seed)
                 fe_exception = retain_call("FE", i, explanation, fe, fe_seed, k=1, budget=dimension)
+                fe_finite = bool(np.isfinite(fe.score))
+                fe_unstable = any(item["category"] == "NearConstantInputWarning" for item in fe.warnings)
+                fe_eligible = bool(fe.analysis_eligible and fe_exception is None)
+                manifest["counts"]["n_FE_official_finite"] += int(fe_finite)
+                manifest["counts"]["n_FE_analysis_eligible"] += int(fe_eligible)
+                manifest["counts"]["n_FE_numerically_unstable"] += int(fe_unstable)
+                manifest["counts"]["n_FE_undefined"] += int(not fe_finite and fe_exception is None)
                 if fe_exception:
                     failures.append({"stage": "public_singleton_FE", "input_id": i,
                                      "explanation": explanation, "category": "exception", "reason": fe_exception})
                     raise RuntimeError(f"Quantus FE/adapter failed; official return and trace retained: {fe_exception}")
-                if reference.valid and fe.valid:
-                    max_fe_error = max(max_fe_error, abs(reference.score - fe.score))
-                else:
+                if reference.valid and fe_finite:
+                    max_fe_error_all_finite = max(max_fe_error_all_finite, abs(reference.score - fe.score))
+                    if fe_eligible:
+                        max_fe_error = max(max_fe_error, abs(reference.score - fe.score))
+                if fe_unstable:
+                    failures.append({"stage": "public_singleton_FE", "input_id": i, "explanation": explanation,
+                                     "category": "numerical_instability", "reason": fe.reason})
+                if not reference.valid or not fe_finite:
                     failures.append({"stage": "population", "input_id": i, "explanation": explanation,
                                      "category": "undefined", "reason": reference.reason if not reference.valid else fe.reason})
                 denominator = float(np.abs(v).sum())
@@ -434,7 +464,9 @@ def run_experiment(
                         "input_id": i, "k": k, "explanation": explanation,
                         "population_FC": reference.score, "reference_type": "HYP-01_coordinate_formula",
                         "singleton_FE": fe.score, "singleton_FE_source": "quantus.FaithfulnessEstimate.__call__",
-                        "valid": reference.valid and fe.valid,
+                        "valid": reference.valid and fe_finite,
+                        "singleton_FE_valid": fe_finite, "singleton_FE_analysis_eligible": fe_eligible,
+                        "singleton_FE_numerical_instability": fe_unstable,
                         "reference_error_L1": reference_error, "reference_error_denominator": denominator,
                         "reference_error_reason": "valid" if denominator else "zero_reference_L1",
                         "population_margin_A_minus_B": actual_margin,
@@ -448,7 +480,8 @@ def run_experiment(
         manifest["validation"] = {
             "enumeration_comparisons": len(enumeration_rows), "enumeration_all_passed": enumerations_passed,
             "max_enumeration_absolute_error": float(max(row["absolute_error"] for row in enumeration_rows)),
-            "max_singleton_FE_coordinate_error_all_inputs": max_fe_error,
+            "max_singleton_FE_coordinate_error_eligible_inputs": max_fe_error,
+            "max_singleton_FE_coordinate_error_all_finite": max_fe_error_all_finite,
             "max_fixed_pair_margin_identity_error": max_margin_error,
             "numerical_tolerance": tolerance,
             "d20_enumeration_scope": "first input at configured subset sizes only",
@@ -458,9 +491,11 @@ def run_experiment(
 
         shape = (n, repetitions, len(sizes), len(budgets), len(EXPLANATION_NAMES))
         scores = np.full(shape, np.nan)
+        analysis_eligible = np.zeros(shape, dtype=bool)
         reasons = np.full(shape, "not_evaluated", dtype="U64")
         raw_fields = ["input_id", "repetition", "draw_plan_id", "k", "budget", "explanation",
-                      "score", "population_score", "error", "valid", "reason", "exception", "score_source"]
+                      "score", "population_score", "error", "valid", "analysis_eligible", "numerical_instability",
+                      "reason", "exception", "score_source"]
         max_budget = max(budgets)
         with (output / "scores.csv").open("w", encoding="utf-8", newline="") as stream:
             writer = csv.DictWriter(stream, fieldnames=raw_fields)
@@ -515,16 +550,27 @@ def run_experiment(
                                     exception = retain_call("FC", i, explanation, result, seed_words,
                                                             repetition=rep, k=k, budget=budget,
                                                             guard_error=guard_error, pairing_verified=pairing_verified)
-                                    valid = result.valid and exception is None
+                                    valid = bool(np.isfinite(result.score))
+                                    eligible = bool(result.analysis_eligible and exception is None)
+                                    unstable = any(item["category"] == "NearConstantInputWarning" for item in result.warnings)
                                     reason = result.reason if guard_error is None else "exception:trace_pairing"
                                     scores[i, rep, ki, bi, ei], reasons[i, rep, ki, bi, ei] = result.score, reason
+                                    analysis_eligible[i, rep, ki, bi, ei] = eligible
                                     writer.writerow({
                                         "input_id": i, "repetition": rep, "draw_plan_id": draw_id,
                                         "k": k, "budget": budget, "explanation": explanation,
                                         "score": result.score, "population_score": population[i, ei],
                                         "error": result.score - population[i, ei], "valid": valid, "reason": reason,
+                                        "analysis_eligible": eligible, "numerical_instability": unstable,
                                         "exception": exception or "", "score_source": "quantus.FaithfulnessCorrelation.__call__",
                                     })
+                                    # Finiteness describes the unmodified library return, even
+                                    # if a later structural guard aborts this attempted score.
+                                    manifest["counts"]["n_valid_scores" if valid else "n_nonfinite_scores"] += 1
+                                    manifest["counts"]["n_official_finite_scores"] += int(valid)
+                                    manifest["counts"]["n_analysis_eligible_scores"] += int(eligible)
+                                    manifest["counts"]["n_numerically_unstable_scores"] += int(unstable)
+                                    manifest["counts"]["n_undefined_scores"] += int(not valid and exception is None)
                                     if exception:
                                         manifest["counts"]["n_exception_scores"] += 1
                                         failures.append({"stage": "public_FC_or_adapter", "input_id": i,
@@ -532,7 +578,10 @@ def run_experiment(
                                                          "explanation": explanation, "category": "exception", "reason": exception})
                                         stream.flush()
                                         raise RuntimeError(f"Quantus FC/adapter failed; official return retained: {exception}")
-                                    manifest["counts"]["n_valid_scores" if valid else "n_nonfinite_scores"] += 1
+                                    if unstable:
+                                        failures.append({"stage": "finite_correlation", "input_id": i, "repetition": rep,
+                                                         "k": k, "budget": budget, "explanation": explanation,
+                                                         "category": "numerical_instability", "reason": reason})
                                     if not valid:
                                         failures.append({"stage": "finite_correlation", "input_id": i, "repetition": rep,
                                                          "k": k, "budget": budget, "explanation": explanation,
@@ -545,11 +594,12 @@ def run_experiment(
                         subset_sizes=np.array(sizes), budgets=np.array(budgets),
                         explanation_names=np.array(EXPLANATION_NAMES),
                     )
-        anchor_values = scores[..., 0]
+        anchor_values = np.where(analysis_eligible[..., 0], scores[..., 0], np.nan)
         finite_anchor = anchor_values[np.isfinite(anchor_values)]
         anchor_error = float(np.max(np.abs(finite_anchor - 1.0))) if len(finite_anchor) else None
-        manifest["validation"]["max_defined_exact_anchor_error"] = anchor_error
-        manifest["validation"]["max_public_trace_replay_absolute_error"] = max_trace_error
+        manifest["validation"]["max_eligible_exact_anchor_error"] = anchor_error
+        manifest["validation"]["max_public_trace_replay_absolute_error_all_diagnostics"] = max_trace_error
+        manifest["validation"]["max_stable_public_trace_replay_absolute_error"] = max_stable_trace_error
         manifest["validation"]["actual_pairing_checks"] = manifest["counts"]["n_pairing_checks_passed"]
         manifest["validation"]["all_FC_calls_paired"] = (
             manifest["counts"]["n_pairing_checks_passed"] == manifest["counts"]["n_attempted_scores"])
@@ -557,13 +607,17 @@ def run_experiment(
         manifest["validation"]["all_public_calls_trace_checked"] = (
             manifest["counts"]["n_trace_checks_passed"] ==
             manifest["counts"]["n_public_FC_calls"] + manifest["counts"]["n_public_FE_calls"])
+        manifest["validation"]["all_public_calls_score_parity_classified"] = (
+            manifest["counts"]["n_score_parity_passed"] + manifest["counts"]["n_score_parity_deferred_near_constant"] ==
+            manifest["counts"]["n_public_FC_calls"] + manifest["counts"]["n_public_FE_calls"])
         if anchor_error is not None and anchor_error > tolerance:
-            raise RuntimeError("a defined exact-anchor correlation differed from one beyond tolerance")
+            raise RuntimeError("an analysis-eligible exact-anchor correlation differed from one beyond tolerance")
         analyzed = analyze_scores(
             scores, reasons, population, sizes, budgets,
             tie_tolerance=config["analysis"]["practical_tie_tolerance"],
             bootstrap_resamples=config["analysis"]["bootstrap_resamples"],
             bootstrap_confidence=config["analysis"]["confidence"], analysis_seed=config["seeds"]["analysis"],
+            analysis_eligible=analysis_eligible,
         )
         for filename, rows in analyzed.items():
             write_csv(output / f"{filename}.csv", rows)
@@ -584,6 +638,11 @@ def run_experiment(
         manifest["error"] = {"type": type(error).__name__, "message": str(error)}
         raise
     finally:
+        # Preserve the distinction even if a later guard aborts before analysis.
+        manifest.setdefault("validation", {}).update({
+            "max_public_trace_replay_absolute_error_all_diagnostics": max_trace_error,
+            "max_stable_public_trace_replay_absolute_error": max_stable_trace_error,
+        })
         manifest["counts"]["n_failures_logged"] = len(failures)
         write_csv(output / "failures.csv", failures, FAILURE_FIELDS)
         manifest["finished_at_utc"] = datetime.now(timezone.utc).isoformat()

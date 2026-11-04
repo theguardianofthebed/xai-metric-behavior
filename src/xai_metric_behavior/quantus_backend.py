@@ -141,6 +141,7 @@ class PublicScore:
     warnings: list[dict[str, str]] = field(default_factory=list)
     exception: str | None = None
     checks: dict[str, Any] = field(default_factory=dict)
+    analysis_eligible: bool = False
 
 
 def _array_hash(*arrays: np.ndarray) -> str:
@@ -155,7 +156,8 @@ def _array_hash(*arrays: np.ndarray) -> str:
 
 def _validate_trace(model: ScalarLogitModel, replacement: _ReplacementLog, pearson: _PearsonLog,
                     x: np.ndarray, a: np.ndarray, baseline: np.ndarray, expected_draws: int,
-                    subset_size: int, score: float, tolerance: float) -> tuple[dict[str, Any], dict[str, Any], str]:
+                    subset_size: int, score: float, tolerance: float,
+                    near_constant: bool = False) -> tuple[dict[str, Any], dict[str, Any], str]:
     if len(replacement.calls) != expected_draws or len(pearson.calls) != 1:
         raise RuntimeError("unexpected public Quantus perturbation/Pearson call count")
     if len(model.inputs) != expected_draws + 1:
@@ -186,9 +188,13 @@ def _validate_trace(model: ScalarLogitModel, replacement: _ReplacementLog, pears
     if not np.array_equal(u, expected_u) or not np.array_equal(v, expected_v):
         raise RuntimeError("logged Pearson U/V differ from actual attributions and model responses")
     reference = checked_pearson(u, v)
-    if bool(np.isfinite(score)) != reference.valid:
+    # A library NearConstantInputWarning means roundoff can dominate Pearson.
+    # Keep the official value and diagnostic replay error, but do not assert
+    # numerical agreement for this ill-conditioned case or analyze it as an
+    # ordinary finite estimator. Shape, replacements and U/V checks still apply.
+    if not near_constant and bool(np.isfinite(score)) != reference.valid:
         raise RuntimeError("public score validity disagrees with its logged Pearson inputs")
-    if reference.valid and abs(score - reference.score) > tolerance:
+    if not near_constant and reference.valid and abs(score - reference.score) > tolerance:
         raise RuntimeError("public score disagrees with independent trace replay")
     if not np.allclose(outputs, np.sum(np.array(actual_after) * model.weights.numpy(), axis=1), atol=tolerance, rtol=0):
         raise RuntimeError("actual model responses differ from the declared scalar logit")
@@ -198,9 +204,14 @@ def _validate_trace(model: ScalarLogitModel, replacement: _ReplacementLog, pears
              "uv_sha256": _array_hash(u, v), "model_input_sha256": _array_hash(*model.inputs)}
     checks = {"n_predictions": len(model.inputs), "n_perturbations": len(replacement.calls),
               "n_pearson_calls": len(pearson.calls), "dtype": "torch.float64", "input_exactly_preserved": True,
-              "original_replacement_verified": True, "trace_replay_absolute_error": abs(score - reference.score) if reference.valid else None,
+              "original_replacement_verified": True,
+              "trace_replay_absolute_error": abs(score - reference.score) if reference.valid and np.isfinite(score) else None,
+              "score_parity_status": "not_asserted_near_constant" if near_constant else "passed",
+              "near_constant_warning": near_constant,
               "n_unchanged_draws": sum(np.array_equal(item, x) for item in actual_after)}
-    return trace, checks, "valid" if reference.valid else reference.reason
+    reason = ("near_constant_input" if np.isfinite(score) else "near_constant_nonfinite") if near_constant else (
+        "valid" if reference.valid else reference.reason)
+    return trace, checks, reason
 
 
 def public_score(metric_name: str, x: np.ndarray, weights: np.ndarray, attribution: np.ndarray,
@@ -242,9 +253,12 @@ def public_score(metric_name: str, x: np.ndarray, weights: np.ndarray, attributi
                               a_batch=a.reshape(1, 1, -1), channel_first=True,
                               softmax=False, device="cpu", batch_size=1)
             result.score = float(returned[0])
+            near_constant = any(item.category.__name__ == "NearConstantInputWarning" for item in recorded)
             result.trace, result.checks, result.reason = _validate_trace(
-                model, replacement, pearson, x, a, np.zeros_like(x), draws, k, result.score, tolerance)
+                model, replacement, pearson, x, a, np.zeros_like(x), draws, k, result.score, tolerance,
+                near_constant=near_constant)
             result.valid = bool(np.isfinite(result.score))
+            result.analysis_eligible = result.valid and not near_constant
     except Exception as error:
         result.valid = False
         result.exception = f"{type(error).__name__}: {error}"

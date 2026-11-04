@@ -131,12 +131,50 @@ class MeasurementContractTests(unittest.TestCase):
                                  tie_tolerance=0.01, bootstrap_resamples=20, bootstrap_confidence=0.95, analysis_seed=42)
         label = "Delta_A_k5_B25_minus_k1_B25"
         record = next(r for r in results["contrast_records"] if r["contrast_id"] == label and r["input_id"] == 0)
-        self.assertEqual(record["joint_valid_repetitions"], "[0]")
-        self.assertAlmostEqual(record["mean_difference_given_joint_valid"], 0.1)
+        self.assertEqual(record["joint_eligible_repetitions"], "[0]")
+        self.assertAlmostEqual(record["mean_difference_given_joint_eligible"], 0.1)
         summary = next(r for r in results["contrast_summary"] if r["contrast_id"] == label)
         self.assertAlmostEqual(summary["mean_difference"], 0.1)
-        self.assertEqual(summary["n_joint_valid"], 4)
+        self.assertEqual(summary["n_joint_eligible"], 4)
         self.assertEqual(summary["selection_warning"], "conditional_only_broader_judgment_unresolved")
+
+    def test_warned_finite_scores_are_preserved_but_excluded_from_paired_analysis(self):
+        scores = np.full((2, 4, 2, 1, 3), 0.4)
+        scores[0, :, 0, 0, 1] = [0.8, 0.9, np.nan, 0.7]
+        scores[0, :, 1, 0, 1] = [0.9, -0.8, 0.6, 0.7]
+        scores[0, 1, 0, 0, 2] = np.nan  # Same pair has both exclusion causes.
+        reasons = np.where(np.isfinite(scores), "valid", "constant_response").astype("U64")
+        reasons[0, 1, 0, 0, 1] = "near_constant_input"
+        original = scores.copy()
+        eligible = np.isfinite(scores) & (reasons != "near_constant_input")
+        results = analyze_scores(scores, reasons, np.array([[1, 0.5, 0.3], [1, 0.6, 0.2]]), [1, 5], [25],
+                                 tie_tolerance=0.01, bootstrap_resamples=20, bootstrap_confidence=0.95,
+                                 analysis_seed=42, analysis_eligible=eligible)
+        np.testing.assert_array_equal(scores, original)
+        arm = next(r for r in results["score_summary"] if r["k"] == 1 and r["explanation"] == "A")
+        self.assertEqual(arm["n_attempted"], 8)
+        self.assertEqual(arm["n_official_finite"], 7)
+        self.assertEqual(arm["n_analysis_eligible"], 6)
+        self.assertEqual(arm["n_undefined"], 1)
+        self.assertEqual(arm["n_numerical_instability"], 1)
+        record = next(r for r in results["contrast_records"]
+                      if r["contrast_id"] == "Delta_A_k5_B25_minus_k1_B25" and r["input_id"] == 0)
+        self.assertEqual(record["joint_eligible_repetitions"], "[0,3]")
+        self.assertAlmostEqual(record["mean_difference_given_joint_eligible"], 0.05)
+        pair = next(r for r in results["contrast_summary"] if r["contrast_id"] == "D_k1_B25")
+        self.assertEqual(pair["n_attempted"], 8)
+        self.assertEqual(pair["n_joint_eligible"], 6)
+        self.assertEqual(pair["n_ineligible"], 2)
+        self.assertEqual(pair["n_with_undefined"], 2)
+        self.assertEqual(pair["n_with_numerical_instability"], 1)
+        self.assertIn("overlap", pair["counting_note"])
+        ineligible_margin = next(r for r in results["pairwise_margins"]
+                                 if r["input_id"] == 0 and r["repetition"] == 1 and r["k"] == 1)
+        self.assertEqual(ineligible_margin["point_judgment"], "analysis_ineligible")
+        with self.assertRaisesRegex(ValueError, "analysis eligibility disagrees"):
+            analyze_scores(scores, reasons, np.zeros((2, 3)), [1, 5], [25], tie_tolerance=0.01,
+                           bootstrap_resamples=20, bootstrap_confidence=0.95, analysis_seed=42,
+                           analysis_eligible=np.isfinite(scores))
 
     def test_tie_and_undefined_states_are_distinct(self):
         self.assertEqual(point_judgment(0.0, 0.01), "exact_numerical_tie")
@@ -182,6 +220,7 @@ class ProvenanceTests(unittest.TestCase):
             self.assertEqual(first["counts"]["n_public_FC_calls"], 48)
             self.assertEqual(first["counts"]["n_public_FE_calls"], 6)
             self.assertEqual(first["counts"]["n_trace_checks_passed"], 54)
+            self.assertTrue(first["validation"]["all_public_calls_score_parity_classified"])
             self.assertTrue(first["validation"]["all_FC_calls_paired"])
             calls = [json.loads(line) for line in (one / "metric_calls.jsonl").read_text().splitlines()]
             self.assertEqual(len(calls), 54)
@@ -234,13 +273,63 @@ class ProvenanceTests(unittest.TestCase):
             with (folder / "failed" / "scores.csv").open() as stream:
                 row = next(csv.DictReader(stream))
             self.assertEqual(float(row["score"]), 0.4321)
-            self.assertEqual(row["valid"], "False")
+            self.assertEqual(row["valid"], "True")  # Official return was finite; the guard still aborted.
+            self.assertEqual(row["analysis_eligible"], "False")
             self.assertIn("injected diagnostic failure", row["exception"])
             last_call = json.loads((folder / "failed" / "metric_calls.jsonl").read_text().splitlines()[-1])
             self.assertEqual(last_call["score"], 0.4321)
-            self.assertFalse(last_call["valid"])
+            self.assertTrue(last_call["valid"])
+            self.assertFalse(last_call["analysis_eligible"])
+            self.assertEqual(manifest["counts"]["n_official_finite_scores"], 1)
+            self.assertEqual(manifest["counts"]["n_analysis_eligible_scores"], 0)
             self.assertTrue((folder / "failed" / last_call["trace_file"]).exists())
             self.assertFalse((folder / "failed" / "contrast_summary.csv").exists())
+
+    @patch("xai_metric_behavior.plotting.plot_results")
+    def test_warned_return_survives_runner_without_entering_conditional_statistics(self, _plot):
+        with tempfile.TemporaryDirectory() as temporary:
+            folder = Path(temporary)
+            config = folder / "config.yaml"
+            self.small_config(config)
+            flagged_scores = []
+
+            def mark_one_recorded_public_return(kind, *args, **kwargs):
+                result = official_public_score(kind, *args, **kwargs)
+                if kind == "FC" and result.valid and not flagged_scores:
+                    flagged_scores.append(result.score)
+                    result.analysis_eligible = False
+                    result.reason = "near_constant_input"
+                    result.warnings.append({"category": "NearConstantInputWarning", "message": "injected pipeline diagnostic"})
+                    result.checks["score_parity_status"] = "not_asserted_near_constant"
+                    result.checks["near_constant_warning"] = True
+                    result.checks["trace_replay_absolute_error"] = 0.057
+                return result
+
+            with patch("xai_metric_behavior.experiment.public_score", side_effect=mark_one_recorded_public_return):
+                manifest = run_experiment(config, folder / "run")
+            self.assertEqual(manifest["status"], "completed")
+            with (folder / "run" / "scores.csv").open() as stream:
+                rows = list(csv.DictReader(stream))
+            warned = next(row for row in rows if row["numerical_instability"] == "True")
+            self.assertEqual(float(warned["score"]), flagged_scores[0])
+            self.assertEqual(warned["valid"], "True")
+            self.assertEqual(warned["analysis_eligible"], "False")
+            self.assertAlmostEqual(float(warned["error"]), flagged_scores[0] - float(warned["population_score"]))
+            counts = manifest["counts"]
+            self.assertEqual(counts["n_numerically_unstable_scores"], 1)
+            self.assertEqual(counts["n_official_finite_scores"] - counts["n_analysis_eligible_scores"], 1)
+            self.assertEqual(counts["n_score_parity_deferred_near_constant"], 1)
+            self.assertTrue(manifest["validation"]["all_public_calls_score_parity_classified"])
+            self.assertEqual(manifest["validation"]["max_public_trace_replay_absolute_error_all_diagnostics"], 0.057)
+            self.assertLess(manifest["validation"]["max_stable_public_trace_replay_absolute_error"], 1e-10)
+            with (folder / "run" / "failures.csv").open() as stream:
+                self.assertEqual(sum(row["category"] == "numerical_instability" for row in csv.DictReader(stream)), 1)
+            with (folder / "run" / "score_summary.csv").open() as stream:
+                summary = next(row for row in csv.DictReader(stream)
+                               if row["k"] == warned["k"] and row["budget"] == warned["budget"]
+                               and row["explanation"] == warned["explanation"])
+            self.assertEqual(int(summary["n_numerical_instability"]), 1)
+            self.assertEqual(int(summary["n_attempted"]), 4)
 
     @patch("xai_metric_behavior.plotting.plot_results")
     def test_freeze_never_runs_reserved_conditions_and_rejects_changes(self, _plot):

@@ -2,7 +2,7 @@
 
 **Quantus 0.6.0 public `FaithfulnessCorrelation` and `FaithfulnessEstimate` calls supply EXP-01's reported metric scores.** [`quantus_backend.py`](../src/xai_metric_behavior/quantus_backend.py) records the public calls; project code supplies the known model, explanations, references and analysis. It never silently substitutes a NumPy score for a failed official call.
 
-This guide describes the pinned implementation contract. **Fresh migration verification is pending**; only the new [verification records](../results/verification/) will support current execution claims. Earlier NumPy-primary tests and audit results remain in [archive/exp01-numpy](../archive/exp01-numpy/).
+This guide describes the pinned implementation contract. **Completed-rerun verification is pending**; [current verification](../results/verification/) will report it. The first attempt is preserved in [its own archive](../archive/exp01-quantus-first-attempt/). Earlier NumPy-primary tests and audit results remain in [archive/exp01-numpy](../archive/exp01-numpy/).
 
 ## 1. Explicit metric settings
 
@@ -40,11 +40,17 @@ Recording wrappers delegate to the official replacement and Pearson functions. T
 | Check | What it establishes |
 |---|---|
 | Analytical / exhaustive reference | Under HYP-01's assumptions, does subset correlation agree with coordinate correlation? Exhaustive scope is declared, not every input. |
-| Same-trace NumPy replay | Do the saved official subsets, replacements, U/V and score reconstruct consistently? This catches adapter/logging errors. |
+| Same-trace NumPy replay | Check saved subsets, replacements and U/V strictly; assert ordinary score agreement. Warned near-constant scores retain a diagnostic discrepancy without that assertion. |
 | Pairing / source / precision guards | Did this run retain the pinned calculation, intended random coupling and input values? |
-| Fresh smoke | Does the configured end-to-end pipeline execute and preserve valid/undefined outcomes? It is not held-out confirmation. |
+| Fresh smoke | Does the pipeline preserve official returns, numerical eligibility, warnings and failures? It is not held-out confirmation. |
 
 Parity is an **implementation guard**, not a new empirical result about explanation quality or an independent proof of the population identity. Keep reported Quantus scores unchanged even when an auxiliary check fails; record the discrepancy and classify the run accordingly. Undefined Pearson values remain nonfinite outcomes with reasons, not replacement scores of zero.
+
+**Observed near-constant case and revised rule.** The first official attempt (source `02cd3d2`, input 2, repeat 1, A, k=19, B=5) stopped at the project's strict replay guard. U had a spread of only `8.881784197001252e-16`; Quantus returned `0.31622776601683805` with `NearConstantInputWarning`, while NumPy replay gave `0.2581988897471609`. Near-zero spread makes Pearson sensitive to rounding; neither finite calculation should be treated as a reliable estimate. [SciPy's warning semantics][pearson-warning]
+
+Before rerunning, the contract now separates `valid` (official finite return) from `analysis_eligible`. The recorded warning makes the estimate ineligible and marks `numerical_instability`. Its official score, warning, actual subsets/U/V and diagnostic discrepancy are retained; `score_parity_status=not_asserted_near_constant`. All structural checks remain strict. Ordinary score parity still uses `1e-10`; there is no score replacement, resampling, or increased tolerance. The regression test reproduces the archived call.
+
+Summary columns explicitly say `*_given_eligible` or `*_given_joint_eligible`. Report official finite, undefined, numerical-instability, exception and total-ineligible counts against all attempts. Reason incidence can overlap across arms; total ineligible is the union, not their sum.
 
 ## 4. Function names do not guarantee the same meaning
 
@@ -84,3 +90,5 @@ Use a fresh audit output path. Inspect package/source identity, check scope, fai
 [similarity]: https://github.com/understandable-machine-intelligence-lab/Quantus/blob/85bcf2c8e88f7b8f3334f552ee72f8a37e870e1a/quantus/functions/similarity_func.py
 
 [init]: https://github.com/understandable-machine-intelligence-lab/Quantus/blob/85bcf2c8e88f7b8f3334f552ee72f8a37e870e1a/quantus/__init__.py
+
+[pearson-warning]: https://docs.scipy.org/doc/scipy-1.17.0/reference/generated/scipy.stats.pearsonr.html

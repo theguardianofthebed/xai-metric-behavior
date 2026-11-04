@@ -11,7 +11,7 @@ Preserve supplied definitions and distinguish **proposed**, **derived**, **imple
 - Freeze scalar target, explanation/reference baseline, sign handling, normalization, sampling law, comparator, aggregation and failures.
 - EXP-01 tests population subset-size invariance against finite estimation effects. Do not use DMS/Response Alignment to force a direction for an invariance prediction.
 - Keep exact anchor and two preregistered nonexact candidates separate. Never select a pair from confirmation reversals.
-- Retain all undefined/exception outcomes and reasons. Compare jointly eligible paired cases; report denominator and selection limits.
+- Retain official scores, undefined/exception outcomes and warnings. For EXP-01, upstream `NearConstantInputWarning` makes a score analysis-ineligible even if finite; defer only its numerical score-parity assertion, retain the discrepancy, and keep structural checks strict. Never replace/resample it or increase the tolerance to hide it. Compare jointly eligible cases; report all-attempt denominators and overlapping reason incidences separately from the ineligible union.
 - Keep input replication separate from evaluator repetitions and subset draws. Preserve coupling when resampling or comparing arms.
 - Do not consume reserved confirmation conditions during routine tests. Freeze predictions, margins, code/configuration and holdouts first. A revised prediction requires fresh confirmation.
 - Never change upstream scores to obtain a preferred outcome; document and verify any compatibility workaround.

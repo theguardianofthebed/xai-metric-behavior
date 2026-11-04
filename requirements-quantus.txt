@@ -1,2 +1,2 @@
+# Compatibility entry point; Quantus is now required by the main experiment.
 -r requirements.txt
-quantus==0.6.0

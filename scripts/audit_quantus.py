@@ -1,7 +1,8 @@
-"""Optional, instrumented parity audit against unmodified Quantus 0.6.0.
+"""Auxiliary source and NumPy-reference audit of Quantus 0.6.0.
 
-The EXP-01 engine is NumPy-based. This audit checks its traces and scores
-against actual Quantus executions; it is not the experiment runner.
+EXP-01 reports official public Quantus scores. These fixed fixtures separately
+check source identity, utility semantics and the auxiliary NumPy reference.
+They do not replace the main Quantus run or its full recorded-trace checks.
 """
 
 from __future__ import annotations
@@ -97,9 +98,10 @@ def _check(name, operation):
 
 
 def run_audit():
-    """Return a JSON-safe audit; absent optional packages are explicit skips."""
+    """Return a JSON-safe audit; missing required packages are failures."""
     report = {
-        "audit": "exp01-quantus-0.6.0-parity-v1",
+        "audit": "exp01-quantus-0.6.0-reference-audit-v2",
+        "role": "auxiliary fixed-fixture/source verification; official Quantus is the primary experiment scorer",
         "quantus_source_commit": QUANTUS_COMMIT,
         "python": platform.python_version(),
         "checks": [],
@@ -107,10 +109,11 @@ def run_audit():
             "Finite controlled fixtures check implementation compatibility, not general metric validity.",
             "No development or held-out confirmation experiment is executed by this script.",
             "No Quantus validation, scoring, RNG function, or installed source is monkeypatched.",
+            "The dyadic fixture is exactly representable in float32/float64; production non-dyadic precision is checked by quantus_backend and its tests.",
         ],
     }
     if util.find_spec("quantus") is None:
-        return {**report, "status": "skipped", "reason": "Optional quantus==0.6.0 is not installed."}
+        return {**report, "status": "failed", "reason": "Required quantus==0.6.0 is not installed."}
     try:
         import quantus
         from quantus.functions.perturb_func import batch_baseline_replacement_by_indices
@@ -222,7 +225,7 @@ def run_audit():
             np.testing.assert_allclose(actual, population, atol=1e-12, rtol=1e-12)
             np.testing.assert_array_equal(np.sort(masks[:, 0]), np.arange(20))
         return {"metric": kind, "candidate": name, "k": masks.shape[1], "draws": len(masks),
-                "quantus_score": float(actual), "engine_score": float(expected),
+                "quantus_score": float(actual), "numpy_reference_score": float(expected),
                 "score_absolute_difference": float(abs(actual - expected)),
                 "max_U_difference": float(np.max(np.abs(comparator.u[0] - u))),
                 "max_V_difference": float(np.max(np.abs(comparator.v[0] - v))),
@@ -267,8 +270,7 @@ def run_audit():
 
         checks.append(_check("public_2d_expected_failure", full_api_2d_failure))
     else:
-        checks.append({"name": "public_torch_API", "status": "skipped", "reason": "Optional torch is not installed."})
-        report["limitations"].append("Direct evaluate_batch parity bypasses public preprocessing; that path is unverified without torch.")
+        checks.append({"name": "public_torch_API", "status": "failed", "reason": "Required torch is not installed."})
 
     failed = [c for c in checks if c["status"] == "failed"]
     skipped = [c for c in checks if c["status"] == "skipped"]
@@ -286,7 +288,7 @@ def main():
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2, ensure_ascii=False, allow_nan=False) + "\n", encoding="utf-8")
     print(f"Quantus audit: {report['status']} — {args.output}")
-    return 1 if report["status"] == "failed" else 2 if report["status"] == "skipped" else 0
+    return 0 if report["status"] == "passed" else 1
 
 
 if __name__ == "__main__":

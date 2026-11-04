@@ -16,9 +16,10 @@ import numpy as np
 import yaml
 
 from .analysis import analyze_scores
-from .core import (EXPLANATION_NAMES, METRIC_VARIANT, LinearOracle, checked_pearson,
-                   contribution_vectors, draw_plan, enumerate_fc,
-                   perturbation_trace, singleton_fe)
+from .core import (EXPLANATION_NAMES, LinearOracle, checked_pearson,
+                   contribution_vectors, enumerate_fc, singleton_fe)
+from .quantus_backend import (METRIC_VARIANT, PublicScore, backend_provenance,
+                             evaluator_seed_words, public_score, verify_pairing)
 
 
 DEFAULT_WEIGHTS = [2.5, -2.0, 1.5, 1.0, -0.5] + [0.0] * 15
@@ -166,6 +167,8 @@ def _checked_confirmation(config: dict[str, Any], freeze_path: str | Path | None
         raise ValueError("confirmation configuration differs from its frozen specification")
     if frozen.get("implementation_sha256") != implementation_hash():
         raise ValueError("source code differs from the freeze; redevelop and freeze a new protocol")
+    if frozen.get("backend_execution_sha256") != backend_provenance()["execution_sha256"]:
+        raise ValueError("Quantus backend differs from the freeze; redevelop and freeze a new protocol")
     if frozen.get("experiment_id") != "EXP-01" or frozen.get("status") != "frozen_before_confirmation":
         raise ValueError("invalid confirmation freeze record")
     return {"file": str(freeze_file.resolve()), "sha256": file_hash(freeze_file), "record": frozen}
@@ -189,6 +192,9 @@ def freeze_confirmation(
         raise ValueError("freeze requires a completed development run, not smoke or partial outputs")
     if manifest.get("implementation_sha256") != implementation_hash():
         raise ValueError("source changed after development; repeat development before freezing")
+    backend = backend_provenance()
+    if manifest.get("backend_execution_sha256") != backend["execution_sha256"]:
+        raise ValueError("Quantus backend changed after development; repeat development before freezing")
     dev_config = yaml.safe_load((run_dir / "resolved_config.yaml").read_text(encoding="utf-8"))
     if set(dev_config["subset_sizes"]) & set(config["subset_sizes"]):
         raise ValueError("confirmation sizes must be reserved from development")
@@ -214,6 +220,7 @@ def freeze_confirmation(
         "record_type": "local_content_lock_not_external_preregistration",
         "config_sha256": canonical_hash(config), "configuration": config,
         "implementation_sha256": implementation_hash(), "git": _git_provenance(),
+        "backend_execution_sha256": backend["execution_sha256"], "quantus_backend": backend,
         "development_manifest_sha256": file_hash(manifest_file),
         "development_run_id": manifest["run_id"],
         "fixed_pair": {"A": [[0, 5]], "B": [[0, 5], [1, 6]], "indices": "zero_based"},
@@ -263,7 +270,8 @@ def _enumeration_checks(
                     "fixture": name, "input_id": 0 if name.startswith("first") else "toy",
                     "dimension": len(x), "k": k, "n_subsets": comb(len(x), k),
                     "explanation": explanation, "coordinate_prediction": coordinate.score,
-                    "enumerated_FC": score.score, "singleton_FE": fe.score,
+                    "enumerated_FC": score.score, "reference_singleton_FE": fe.score,
+                    "reference_engine": "independent_numpy_model_deletion_check",
                     "absolute_error": error, "numerical_tolerance": tolerance,
                     "valid": score.valid, "reason": score.reason, "passed": passed,
                     "scope": "one_exact_fixture_not_all_inputs",
@@ -280,25 +288,29 @@ def run_experiment(
     """Run a declared phase and return its manifest. Existing outputs are protected."""
     config = load_config(config_path)
     freeze = _checked_confirmation(config, freeze_path)
+    backend = backend_provenance()
     output = Path(output_dir)
     output.mkdir(parents=True, exist_ok=False)
     (output / "traces").mkdir()
     started = datetime.now(timezone.utc).isoformat()
     timer = time.monotonic()
-    snapshot = Path(__file__).resolve().parents[2] / "docs" / "atlas_snapshot_2026-11-04.json"
+    snapshot = Path(__file__).resolve().parents[2] / "docs" / "atlas_quantus_contract_2026-11-04.json"
     manifest: dict[str, Any] = {
         "experiment_id": "EXP-01", "phase": config["phase"], "status": "running",
         "run_id": canonical_hash({"config": config, "started": started})[:16],
         "started_at_utc": started, "config_sha256": canonical_hash(config),
         "implementation_sha256": implementation_hash(), "git": _git_provenance(),
         "runtime": _runtime(), "metric_variant": METRIC_VARIANT,
-        "library_execution": "Transparent NumPy evaluator; Quantus execution is a separate optional audit.",
-        "atlas": {"id": "3973d962-747e-45ef-b05c-18dd541358d9", "source_revision": 4,
+        "library_execution": "Official Quantus 0.6.0 public FC/FE returns; NumPy is reference/trace verification only.",
+        "backend_execution_sha256": backend["execution_sha256"], "quantus_backend": backend,
+        "atlas": {"id": "3973d962-747e-45ef-b05c-18dd541358d9", "source_revision": 8,
                   "snapshot_sha256": file_hash(snapshot) if snapshot.exists() else None},
-        "rng": {"generator": "PCG64", "seed_roots": config["seeds"],
-                "evaluator_seed_sequence": "[evaluator_seed, phase_id, input_id, repetition]",
+        "rng": {"input_generator": "PCG64", "evaluator_generator": "Quantus native NumPy legacy MT19937",
+                "seed_roots": config["seeds"],
+                "evaluator_seed_sequence": "SeedSequence([evaluator_seed, phase_id, input_id, repetition]).generate_state(4, uint32)",
                 "phase_id": PHASE_IDS[config["phase"]],
-                "coupling": "independent permutation per draw; prefixes share k and budgets; same plan across explanations"},
+                "coupling": "Reset identical legacy state per condition/candidate; verify actual native k/budget/explanation prefixes",
+                "global_state": "Serial scoped calls restore NumPy state and Torch default dtype"},
         "contract": {"target": "scalar g(x)=sum_j w_j*x_j; no softmax/class selection",
                      "baseline": 0.0, "signed": True, "abs": False, "normalise": False,
                      "selection": "uniform size-k without replacement within draw; independent draws",
@@ -309,12 +321,74 @@ def run_experiment(
         "counts": {"n_inputs": config["n_inputs"], "repetitions_per_input": config["repetitions"],
                    "n_planned_scores": config["n_inputs"] * config["repetitions"] * len(config["subset_sizes"]) * len(config["budgets"]) * 3,
                    "n_attempted_scores": 0, "n_valid_scores": 0, "n_nonfinite_scores": 0,
-                   "n_exception_scores": 0, "n_exceptions": 0, "n_failures_logged": 0},
+                   "n_exception_scores": 0, "n_exceptions": 0, "n_failures_logged": 0,
+                   "n_public_FC_calls": 0, "n_public_FE_calls": 0,
+                   "n_trace_checks_passed": 0, "n_pairing_checks_passed": 0,
+                   "n_warning_records": 0},
         "interpretation": "Population theorem under declared premises; finite estimates and illustrative budget choices do not establish universal metric reliability.",
     }
     (output / "resolved_config.yaml").write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")
     _write_json(output / "manifest.json", manifest)
     failures: list[dict[str, Any]] = []
+    call_index = 0
+    max_trace_error = 0.0
+
+    def invoke(kind: str, input_id: int, explanation: str, x_value: np.ndarray,
+               attribution: np.ndarray, seed_words: np.ndarray, *,
+               k: int | None = None, budget: int | None = None) -> PublicScore:
+        manifest["counts"][f"n_public_{kind}_calls"] += 1
+        try:
+            return public_score(kind, x_value, weights, attribution, seed_words,
+                                subset_size=k, budget=budget,
+                                tolerance=config["analysis"]["numerical_tolerance"])
+        except Exception as error:
+            # There is no official return in this case. NaN records absence;
+            # an oracle score is never used to fill it.
+            return PublicScore(float("nan"), False, f"exception:{type(error).__name__}",
+                               exception=f"{type(error).__name__}: {error}")
+
+    def retain_call(kind: str, input_id: int, explanation: str, result: PublicScore,
+                    seed_words: np.ndarray, *, repetition: int | None = None,
+                    k: int | None = None, budget: int | None = None,
+                    guard_error: str | None = None, pairing_verified: bool = False) -> str | None:
+        nonlocal call_index, max_trace_error
+        call_index += 1
+        exception = result.exception or guard_error
+        trace_path = None
+        if kind == "FE" or exception:
+            name = (f"FE_input_{input_id:04d}_{explanation}.npz" if kind == "FE" else
+                    f"failed_call_{call_index:07d}.npz")
+            trace_path = f"traces/{name}"
+            np.savez_compressed(output / trace_path,
+                                **{key: np.asarray(value) for key, value in result.trace.items()
+                                   if value is not None})
+        if result.checks:
+            manifest["counts"]["n_trace_checks_passed"] += 1
+            discrepancy = result.checks.get("trace_replay_absolute_error")
+            if discrepancy is not None:
+                max_trace_error = max(max_trace_error, float(discrepancy))
+        if pairing_verified:
+            manifest["counts"]["n_pairing_checks_passed"] += 1
+        manifest["counts"]["n_warning_records"] += len(result.warnings)
+        record = {
+            "call_id": call_index, "metric": kind,
+            "public_api": f"quantus.Faithfulness{'Correlation' if kind == 'FC' else 'Estimate'}.__call__",
+            "input_id": input_id, "repetition": repetition, "explanation": explanation,
+            "k": k, "budget": budget, "seed_words": seed_words.tolist(),
+            "score": float(result.score) if np.isfinite(result.score) else None,
+            "raw_score_repr": repr(float(result.score)),
+            "valid": bool(result.valid and exception is None),
+            "reason": result.reason if guard_error is None else "exception:trace_pairing",
+            "exception": exception, "checks": result.checks,
+            "pairing_verified": pairing_verified,
+            "mask_sha256": result.trace.get("mask_sha256"),
+            "uv_sha256": result.trace.get("uv_sha256"),
+            "model_input_sha256": result.trace.get("model_input_sha256"),
+            "trace_file": trace_path, "warnings": result.warnings,
+        }
+        with (output / "metric_calls.jsonl").open("a", encoding="utf-8") as stream:
+            stream.write(json.dumps(record, ensure_ascii=False, allow_nan=False) + "\n")
+        return exception
     try:
         n, repetitions, dimension = config["n_inputs"], config["repetitions"], config["dimension"]
         sizes, budgets = config["subset_sizes"], config["budgets"]
@@ -341,7 +415,13 @@ def run_experiment(
                 max_margin_error = max(max_margin_error, abs(actual_margin - theoretical_margin))
             for ei, explanation in enumerate(EXPLANATION_NAMES):
                 reference = coordinate[ei]
-                fe = singleton_fe(model, x[i], baseline, stacked[i, ei])
+                fe_seed = evaluator_seed_words(config["seeds"]["evaluator"], PHASE_IDS[config["phase"]], i, 0)
+                fe = invoke("FE", i, explanation, x[i], stacked[i, ei], fe_seed)
+                fe_exception = retain_call("FE", i, explanation, fe, fe_seed, k=1, budget=dimension)
+                if fe_exception:
+                    failures.append({"stage": "public_singleton_FE", "input_id": i,
+                                     "explanation": explanation, "category": "exception", "reason": fe_exception})
+                    raise RuntimeError(f"Quantus FE/adapter failed; official return and trace retained: {fe_exception}")
                 if reference.valid and fe.valid:
                     max_fe_error = max(max_fe_error, abs(reference.score - fe.score))
                 else:
@@ -353,7 +433,8 @@ def run_experiment(
                     population_rows.append({
                         "input_id": i, "k": k, "explanation": explanation,
                         "population_FC": reference.score, "reference_type": "HYP-01_coordinate_formula",
-                        "singleton_FE": fe.score, "valid": reference.valid and fe.valid,
+                        "singleton_FE": fe.score, "singleton_FE_source": "quantus.FaithfulnessEstimate.__call__",
+                        "valid": reference.valid and fe.valid,
                         "reference_error_L1": reference_error, "reference_error_denominator": denominator,
                         "reference_error_reason": "valid" if denominator else "zero_reference_L1",
                         "population_margin_A_minus_B": actual_margin,
@@ -379,58 +460,103 @@ def run_experiment(
         scores = np.full(shape, np.nan)
         reasons = np.full(shape, "not_evaluated", dtype="U64")
         raw_fields = ["input_id", "repetition", "draw_plan_id", "k", "budget", "explanation",
-                      "score", "population_score", "error", "valid", "reason"]
+                      "score", "population_score", "error", "valid", "reason", "exception", "score_source"]
         max_budget = max(budgets)
         with (output / "scores.csv").open("w", encoding="utf-8", newline="") as stream:
             writer = csv.DictWriter(stream, fieldnames=raw_fields)
             writer.writeheader()
             for i in range(n):
-                plans = np.empty((repetitions, max_budget, dimension), dtype=np.uint8)
-                us = np.empty((repetitions, len(sizes), max_budget, len(EXPLANATION_NAMES)))
-                vs = np.empty((repetitions, len(sizes), max_budget))
-                outputs = np.empty_like(vs)
-                for rep in range(repetitions):
-                    seed = np.random.SeedSequence([config["seeds"]["evaluator"], PHASE_IDS[config["phase"]], i, rep])
-                    plan = draw_plan(dimension, max_budget, seed)
-                    plans[rep] = plan
-                    draw_id = f"{config['phase']}:input-{i}:rep-{rep}"
-                    for ki, k in enumerate(sizes):
-                        trace = perturbation_trace(model, x[i], baseline, stacked[i], plan, k)
-                        us[rep, ki], vs[rep, ki] = trace["U"], trace["V"]
-                        outputs[rep, ki] = trace["perturbed_outputs"]
-                        for bi, budget in enumerate(budgets):
-                            for ei, explanation in enumerate(EXPLANATION_NAMES):
-                                manifest["counts"]["n_attempted_scores"] += 1
-                                try:
-                                    result = checked_pearson(us[rep, ki, :budget, ei], vs[rep, ki, :budget])
-                                except Exception as error:
-                                    manifest["counts"]["n_exception_scores"] += 1
-                                    failures.append({"stage": "finite_correlation", "input_id": i, "repetition": rep,
-                                                     "k": k, "budget": budget, "explanation": explanation,
-                                                     "category": "exception", "reason": f"{type(error).__name__}: {error}"})
-                                    raise
-                                count_key = "n_valid_scores" if result.valid else "n_nonfinite_scores"
-                                manifest["counts"][count_key] += 1
-                                scores[i, rep, ki, bi, ei], reasons[i, rep, ki, bi, ei] = result.score, result.reason
-                                writer.writerow({
-                                    "input_id": i, "repetition": rep, "draw_plan_id": draw_id,
-                                    "k": k, "budget": budget, "explanation": explanation,
-                                    "score": result.score, "population_score": population[i, ei],
-                                    "error": result.score - population[i, ei], "valid": result.valid, "reason": result.reason,
-                                })
-                                if not result.valid:
-                                    failures.append({"stage": "finite_correlation", "input_id": i, "repetition": rep,
-                                                     "k": k, "budget": budget, "explanation": explanation,
-                                                     "category": "undefined", "reason": result.reason})
-                np.savez_compressed(
-                    output / "traces" / f"input_{i:04d}.npz", permutations=plans, U=us, V=vs,
-                    perturbed_outputs=outputs, original_output=float(model(x[i])),
-                    subset_sizes=np.array(sizes), budgets=np.array(budgets), explanation_names=np.array(EXPLANATION_NAMES),
-                )
+                observed = {k: np.full((repetitions, max_budget, k), -1, dtype=np.int16) for k in sizes}
+                us = np.full((repetitions, len(sizes), max_budget, len(EXPLANATION_NAMES)), np.nan)
+                vs = np.full((repetitions, len(sizes), max_budget), np.nan)
+                outputs = np.full_like(vs, np.nan)
+                original_output = float("nan")
+                try:
+                    for rep in range(repetitions):
+                        seed_words = evaluator_seed_words(config["seeds"]["evaluator"], PHASE_IDS[config["phase"]], i, rep)
+                        draw_id = f"{config['phase']}:input-{i}:rep-{rep}"
+                        reference_trace = None
+                        # The first real call is the largest k/B exact candidate.
+                        # Its observed masks are the pairing reference; no extra
+                        # uncounted metric call or injected permutation is needed.
+                        for ki in reversed(range(len(sizes))):
+                            k = sizes[ki]
+                            for bi in reversed(range(len(budgets))):
+                                budget = budgets[bi]
+                                for ei, explanation in enumerate(EXPLANATION_NAMES):
+                                    manifest["counts"]["n_attempted_scores"] += 1
+                                    result = invoke("FC", i, explanation, x[i], stacked[i, ei], seed_words,
+                                                    k=k, budget=budget)
+                                    guard_error, pairing_verified = None, False
+                                    if result.exception is None:
+                                        try:
+                                            trace = result.trace
+                                            if reference_trace is None:
+                                                reference_trace = trace
+                                                original_output = float(trace["original_output"])
+                                            verify_pairing(reference_trace, trace, budget=budget, subset_size=k)
+                                            if float(trace["original_output"]) != original_output:
+                                                raise RuntimeError("original prediction changed between paired public calls")
+                                            if budget == max_budget:
+                                                us[rep, ki, :, ei] = trace["U"]
+                                                if ei == 0:
+                                                    observed[k][rep] = trace["subsets"]
+                                                    vs[rep, ki], outputs[rep, ki] = trace["V"], trace["perturbed_outputs"]
+                                                elif not (np.array_equal(vs[rep, ki], trace["V"]) and
+                                                          np.array_equal(outputs[rep, ki], trace["perturbed_outputs"])):
+                                                    raise RuntimeError("model responses differ across paired explanations")
+                                            elif not (np.array_equal(us[rep, ki, :budget, ei], trace["U"]) and
+                                                      np.array_equal(vs[rep, ki, :budget], trace["V"]) and
+                                                      np.array_equal(outputs[rep, ki, :budget], trace["perturbed_outputs"])):
+                                                raise RuntimeError("actual U/V/model outputs violate budget-prefix replay")
+                                            pairing_verified = True
+                                        except Exception as error:
+                                            guard_error = f"{type(error).__name__}: {error}"
+                                    exception = retain_call("FC", i, explanation, result, seed_words,
+                                                            repetition=rep, k=k, budget=budget,
+                                                            guard_error=guard_error, pairing_verified=pairing_verified)
+                                    valid = result.valid and exception is None
+                                    reason = result.reason if guard_error is None else "exception:trace_pairing"
+                                    scores[i, rep, ki, bi, ei], reasons[i, rep, ki, bi, ei] = result.score, reason
+                                    writer.writerow({
+                                        "input_id": i, "repetition": rep, "draw_plan_id": draw_id,
+                                        "k": k, "budget": budget, "explanation": explanation,
+                                        "score": result.score, "population_score": population[i, ei],
+                                        "error": result.score - population[i, ei], "valid": valid, "reason": reason,
+                                        "exception": exception or "", "score_source": "quantus.FaithfulnessCorrelation.__call__",
+                                    })
+                                    if exception:
+                                        manifest["counts"]["n_exception_scores"] += 1
+                                        failures.append({"stage": "public_FC_or_adapter", "input_id": i,
+                                                         "repetition": rep, "k": k, "budget": budget,
+                                                         "explanation": explanation, "category": "exception", "reason": exception})
+                                        stream.flush()
+                                        raise RuntimeError(f"Quantus FC/adapter failed; official return retained: {exception}")
+                                    manifest["counts"]["n_valid_scores" if valid else "n_nonfinite_scores"] += 1
+                                    if not valid:
+                                        failures.append({"stage": "finite_correlation", "input_id": i, "repetition": rep,
+                                                         "k": k, "budget": budget, "explanation": explanation,
+                                                         "category": "undefined", "reason": reason})
+                finally:
+                    np.savez_compressed(
+                        output / "traces" / f"input_{i:04d}.npz", U=us, V=vs,
+                        perturbed_outputs=outputs, original_output=original_output,
+                        **{f"subsets_k{k}": values for k, values in observed.items()},
+                        subset_sizes=np.array(sizes), budgets=np.array(budgets),
+                        explanation_names=np.array(EXPLANATION_NAMES),
+                    )
         anchor_values = scores[..., 0]
         finite_anchor = anchor_values[np.isfinite(anchor_values)]
         anchor_error = float(np.max(np.abs(finite_anchor - 1.0))) if len(finite_anchor) else None
         manifest["validation"]["max_defined_exact_anchor_error"] = anchor_error
+        manifest["validation"]["max_public_trace_replay_absolute_error"] = max_trace_error
+        manifest["validation"]["actual_pairing_checks"] = manifest["counts"]["n_pairing_checks_passed"]
+        manifest["validation"]["all_FC_calls_paired"] = (
+            manifest["counts"]["n_pairing_checks_passed"] == manifest["counts"]["n_attempted_scores"])
+        manifest["validation"]["public_FE_calls"] = manifest["counts"]["n_public_FE_calls"]
+        manifest["validation"]["all_public_calls_trace_checked"] = (
+            manifest["counts"]["n_trace_checks_passed"] ==
+            manifest["counts"]["n_public_FC_calls"] + manifest["counts"]["n_public_FE_calls"])
         if anchor_error is not None and anchor_error > tolerance:
             raise RuntimeError("a defined exact-anchor correlation differed from one beyond tolerance")
         analyzed = analyze_scores(

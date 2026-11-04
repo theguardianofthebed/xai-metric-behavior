@@ -1,7 +1,8 @@
 """Small, inspectable numerical pieces for the EXP-01 measurement contract.
 
-This is a transparent implementation of the declared Pearson/subset definition,
-not a call to Quantus. The optional Quantus audit checks library parity separately.
+These are auxiliary analytical, exhaustive and trace-replay calculations.
+Reported experimental FC/FE scores come from quantus_backend's official public
+Quantus calls; these reference functions never replace their returned values.
 Feature indices in files and arrays are zero based.
 """
 from __future__ import annotations
@@ -15,7 +16,7 @@ import numpy as np
 
 
 EXPLANATION_NAMES = ("exact", "A", "B")
-METRIC_VARIANT = "exp01-numpy-pearson-v1"
+REFERENCE_VARIANT = "exp01-numpy-reference-v1"
 
 
 @dataclass(frozen=True)

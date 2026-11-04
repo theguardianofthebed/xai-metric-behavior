@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "xai-metric-behavior"
-version = "0.2.0"
+version = "0.3.0"
 description = "Atlas-defined, traceable experiments on XAI metric measurement mechanisms."
 requires-python = ">=3.11,<3.14"
 readme = "README.md"
@@ -13,10 +13,11 @@ dependencies = [
   "scipy==1.17.0",
   "PyYAML==6.0.3",
   "matplotlib==3.10.8",
+  "quantus==0.6.0",
+  "torch==2.10.0",
 ]
 
 [project.optional-dependencies]
-quantus = ["quantus==0.6.0"]
 notebook = ["jupyterlab>=4,<5", "nbclient>=0.10,<1", "nbformat>=5,<6"]
 
 [tool.setuptools.packages.find]

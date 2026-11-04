@@ -17,6 +17,7 @@ from xai_metric_behavior.core import (LinearOracle, checked_pearson, contributio
                                       draw_plan, enumerate_fc, perturbation_trace, singleton_fe)
 from xai_metric_behavior.experiment import (DEFAULT_WEIGHTS, freeze_confirmation, load_config,
                                             run_experiment)
+from xai_metric_behavior.quantus_backend import PublicScore, public_score as official_public_score
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -177,8 +178,20 @@ class ProvenanceTests(unittest.TestCase):
             self.assertEqual(first["status"], "completed")
             self.assertEqual((one / "scores.csv").read_text(), (two / "scores.csv").read_text())
             self.assertEqual(first["counts"], second["counts"])
+            self.assertEqual(first["metric_variant"], "exp01-quantus-public-0.6.0-v1")
+            self.assertEqual(first["counts"]["n_public_FC_calls"], 48)
+            self.assertEqual(first["counts"]["n_public_FE_calls"], 6)
+            self.assertEqual(first["counts"]["n_trace_checks_passed"], 54)
+            self.assertTrue(first["validation"]["all_FC_calls_paired"])
+            calls = [json.loads(line) for line in (one / "metric_calls.jsonl").read_text().splitlines()]
+            self.assertEqual(len(calls), 54)
+            self.assertTrue(all(call["pairing_verified"] for call in calls if call["metric"] == "FC"))
+            self.assertTrue(all(call["exception"] is None for call in calls))
             with np.load(one / "traces" / "input_0000.npz") as trace:
-                self.assertEqual(trace["permutations"].shape, (2, 10, 20))
+                self.assertNotIn("permutations", trace.files)
+                self.assertEqual(trace["subsets_k1"].shape, (2, 10, 1))
+                self.assertEqual(trace["subsets_k5"].shape, (2, 10, 5))
+                np.testing.assert_array_equal(trace["subsets_k1"], trace["subsets_k5"][:, :, :1])
                 for rep in [0, 1]:
                     recovered = checked_pearson(trace["U"][rep, 0, :5, 1], trace["V"][rep, 0, :5])
                     with (one / "scores.csv").open() as stream:
@@ -188,6 +201,12 @@ class ProvenanceTests(unittest.TestCase):
                         self.assertAlmostEqual(recovered.score, float(row["score"]))
                     else:
                         self.assertEqual(recovered.reason, row["reason"])
+            with np.load(one / "traces" / "FE_input_0000_A.npz") as trace:
+                np.testing.assert_array_equal(np.sort(trace["subsets"][:, 0]), np.arange(20))
+                self.assertEqual(trace["model_inputs"].shape, (21, 20))
+            with (one / "population_scores.csv").open() as stream:
+                self.assertTrue(all(row["singleton_FE_source"] == "quantus.FaithfulnessEstimate.__call__"
+                                    for row in csv.DictReader(stream)))
             with self.assertRaises(FileExistsError):
                 run_experiment(config, one)
 
@@ -197,15 +216,31 @@ class ProvenanceTests(unittest.TestCase):
             folder = Path(temporary)
             config = folder / "config.yaml"
             self.small_config(config)
-            with patch("xai_metric_behavior.experiment.perturbation_trace", side_effect=RuntimeError("injected diagnostic failure")):
+            def failed_after_official_return(kind, *args, **kwargs):
+                if kind == "FE":
+                    return official_public_score(kind, *args, **kwargs)
+                return PublicScore(0.4321, False, "exception:RuntimeError",
+                                   exception="RuntimeError: injected diagnostic failure after a finite official return")
+            with patch("xai_metric_behavior.experiment.public_score", side_effect=failed_after_official_return):
                 with self.assertRaisesRegex(RuntimeError, "injected diagnostic"):
                     run_experiment(config, folder / "failed")
             manifest = json.loads((folder / "failed" / "manifest.json").read_text())
             self.assertEqual(manifest["status"], "failed")
-            self.assertEqual(manifest["counts"]["n_attempted_scores"], 0)
+            self.assertEqual(manifest["counts"]["n_attempted_scores"], 1)
+            self.assertEqual(manifest["counts"]["n_exception_scores"], 1)
             self.assertEqual(manifest["counts"]["n_exceptions"], 1)
             self.assertGreater(manifest["counts"]["n_planned_scores"], 0)
             self.assertIn("injected diagnostic failure", (folder / "failed" / "failures.csv").read_text())
+            with (folder / "failed" / "scores.csv").open() as stream:
+                row = next(csv.DictReader(stream))
+            self.assertEqual(float(row["score"]), 0.4321)
+            self.assertEqual(row["valid"], "False")
+            self.assertIn("injected diagnostic failure", row["exception"])
+            last_call = json.loads((folder / "failed" / "metric_calls.jsonl").read_text().splitlines()[-1])
+            self.assertEqual(last_call["score"], 0.4321)
+            self.assertFalse(last_call["valid"])
+            self.assertTrue((folder / "failed" / last_call["trace_file"]).exists())
+            self.assertFalse((folder / "failed" / "contrast_summary.csv").exists())
 
     @patch("xai_metric_behavior.plotting.plot_results")
     def test_freeze_never_runs_reserved_conditions_and_rejects_changes(self, _plot):
@@ -213,7 +248,7 @@ class ProvenanceTests(unittest.TestCase):
             folder = Path(temporary)
             dev_path, confirm_path = folder / "dev.yaml", folder / "confirm.yaml"
             self.small_config(dev_path, phase="development")
-            run_experiment(dev_path, folder / "development")
+            development = run_experiment(dev_path, folder / "development")
             confirm = yaml.safe_load((ROOT / "configs" / "exp01_confirmation.yaml").read_text())
             confirm["analysis"]["bootstrap_resamples"] = 20
             confirm_path.write_text(yaml.safe_dump(confirm))
@@ -223,6 +258,17 @@ class ProvenanceTests(unittest.TestCase):
             freeze = freeze_confirmation(confirm_path, folder / "development", folder / "freeze.json")
             self.assertEqual(freeze["configuration"]["subset_sizes"], [2, 7, 13])
             self.assertEqual(freeze["status"], "frozen_before_confirmation")
+            self.assertEqual(freeze["backend_execution_sha256"], development["backend_execution_sha256"])
+            changed_backend = {**development["quantus_backend"], "execution_sha256": "different-runtime"}
+            with patch("xai_metric_behavior.experiment.backend_provenance", return_value=changed_backend), \
+                    patch("xai_metric_behavior.experiment.public_score") as no_reserved_call:
+                with self.assertRaisesRegex(ValueError, "backend changed after development"):
+                    freeze_confirmation(confirm_path, folder / "development", folder / "invalid-freeze.json")
+                with self.assertRaisesRegex(ValueError, "backend differs from the freeze"):
+                    run_experiment(confirm_path, folder / "should_not_exist", freeze_path=folder / "freeze.json")
+                no_reserved_call.assert_not_called()
+            self.assertFalse((folder / "invalid-freeze.json").exists())
+            self.assertFalse((folder / "should_not_exist").exists())
             with self.assertRaises(FileExistsError):
                 freeze_confirmation(confirm_path, folder / "development", folder / "freeze.json")
             confirm["n_inputs"] += 1

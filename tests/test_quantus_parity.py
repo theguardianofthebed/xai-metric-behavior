@@ -1,7 +1,6 @@
-"""Optional integration tests; an absent Quantus installation is an explicit skip."""
+"""Required source/fixture guards; a missing evaluator dependency is a failure."""
 
 from functools import lru_cache
-from importlib.util import find_spec
 import unittest
 
 from scripts.audit_quantus import run_audit
@@ -12,7 +11,6 @@ def audit():
     return run_audit()
 
 
-@unittest.skipUnless(find_spec("quantus"), "Optional quantus==0.6.0 is not installed")
 class QuantusParityTests(unittest.TestCase):
     def assert_group_passes(self, prefix):
         report = audit()
@@ -30,10 +28,9 @@ class QuantusParityTests(unittest.TestCase):
     def test_upstream_shape_limit_is_explicit(self):
         self.assert_group_passes("unpatched_shape_validation")
 
-    def test_actual_evaluate_batch_matches_engine_traces(self):
+    def test_actual_evaluate_batch_matches_numpy_reference(self):
         self.assert_group_passes("batch_")
 
-    @unittest.skipUnless(find_spec("torch"), "Optional torch is not installed")
     def test_public_api_matches_and_retains_expected_2d_failure(self):
         self.assert_group_passes("public_")
 

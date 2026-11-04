@@ -40,6 +40,8 @@ The [live XAI Framework Atlas](https://timecapsule-traceability-atlas.iamlim0619
 
 ## Current evidence and boundaries
 
-**Completed Quantus rerun verification is pending.** The [failure report](docs/EXP-01.md#5-limitations--failure-report) records the first attempt's near-constant case: its official finite score is preserved and excluded from analysis, with the warning and denominator retained. Earlier NumPy-engine results are preserved in [archive/exp01-numpy](archive/exp01-numpy/); the original Phase 1 scaffold remains in [archive/phase1](archive/README.md). Neither is relabeled as a Quantus experiment.
+**Latest Quantus smoke completed:** 576 FC attempts produced **559 finite returns (555 analysis-eligible, 4 warned near-constant)** and **17 undefined**, with **0 exceptions**. All 27 tests and 34 audit checks passed. The five unchanged notebook cells reproduced key CLI outputs byte-for-byte; hosted Colab/Jupyter UI remains unverified. [Results and limits](docs/EXP-01.md#4-latest-result--smoke)
+
+The first attempt's near-constant case is preserved in the [failure report](docs/EXP-01.md#5-limitations--failure-report). Earlier [NumPy evidence](archive/exp01-numpy/) and the [Phase 1 scaffold](archive/README.md) remain historical. Full development and confirmation have not run.
 
 **Derived**, **implemented**, **observed**, **proposed**, and **unverified** are different evidence states. The initial synthetic Faithfulness study does not establish a universal metric or transfer to real data. Compactness and Robustness/Continuity need their own measurement contracts.

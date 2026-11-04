@@ -4,7 +4,9 @@ Each run writes to a **new directory**. Keep its configuration, code/dependency 
 
 ## Current evidence
 
-`verification/` is reserved for the **fresh Quantus-primary** implementation check: the official smoke run, test/audit records and summary. These are implementation-verification artifacts, not a full development study or held-out confirmation. The completed corrected rerun is pending; the first attempt stopped on a numerical parity guard and is archived separately.
+[`verification/`](verification/) contains the latest **completed Quantus smoke**, run `0221db61739ed30a`, from clean source [`ce08d31`](https://github.com/theguardianofthebed/xai-metric-behavior/commit/ce08d3181f9325b82e91b9bb1b1585e10c787ab7). Its 576 FC attempts include 559 finite returns (555 eligible, 4 near-constant), 17 undefined and 0 exceptions. All 12 singleton FE returns are eligible.
+
+The test/audit records and unchanged notebook-cell replay verify implementation; they are not additional research results. The three key notebook output files matched canonical smoke byte-for-byte. Hosted Colab and interactive Jupyter remain unverified. See [summary.json](verification/summary.json) for precise scope/provenance. Full development and confirmation remain unexecuted.
 
 Normal smoke/development/confirmation output directories are ignored by Git because full traces can be large. Publish complete versioned run directories when sharing a study; a plot alone cannot reconstruct the calculation. Keep the frozen prediction file with confirmation outputs.
 

@@ -2,7 +2,7 @@
 
 **Quantus 0.6.0 public `FaithfulnessCorrelation` and `FaithfulnessEstimate` calls supply EXP-01's reported metric scores.** [`quantus_backend.py`](../src/xai_metric_behavior/quantus_backend.py) records the public calls; project code supplies the known model, explanations, references and analysis. It never silently substitutes a NumPy score for a failed official call.
 
-This guide describes the pinned implementation contract. **Completed-rerun verification is pending**; [current verification](../results/verification/) will report it. The first attempt is preserved in [its own archive](../archive/exp01-quantus-first-attempt/). Earlier NumPy-primary tests and audit results remain in [archive/exp01-numpy](../archive/exp01-numpy/).
+**Current verification completed:** canonical smoke `0221db61739ed30a` ran from clean source [`ce08d31`](https://github.com/theguardianofthebed/xai-metric-behavior/commit/ce08d3181f9325b82e91b9bb1b1585e10c787ab7). The [current records](../results/verification/) are implementation checks, not full development or confirmation. The [first failed attempt](../archive/exp01-quantus-first-attempt/) and [earlier NumPy evidence](../archive/exp01-numpy/) remain separate.
 
 ## 1. Explicit metric settings
 
@@ -48,7 +48,7 @@ Parity is an **implementation guard**, not a new empirical result about explanat
 
 **Observed near-constant case and revised rule.** The first official attempt (source `02cd3d2`, input 2, repeat 1, A, k=19, B=5) stopped at the project's strict replay guard. U had a spread of only `8.881784197001252e-16`; Quantus returned `0.31622776601683805` with `NearConstantInputWarning`, while NumPy replay gave `0.2581988897471609`. Near-zero spread makes Pearson sensitive to rounding; neither finite calculation should be treated as a reliable estimate. [SciPy's warning semantics][pearson-warning]
 
-Before rerunning, the contract now separates `valid` (official finite return) from `analysis_eligible`. The recorded warning makes the estimate ineligible and marks `numerical_instability`. Its official score, warning, actual subsets/U/V and diagnostic discrepancy are retained; `score_parity_status=not_asserted_near_constant`. All structural checks remain strict. Ordinary score parity still uses `1e-10`; there is no score replacement, resampling, or increased tolerance. The regression test reproduces the archived call.
+The contract was revised before rerunning to separate `valid` (official finite return) from `analysis_eligible`. The recorded warning makes the estimate ineligible and marks `numerical_instability`. Its official score, warning, actual subsets/U/V and diagnostic discrepancy are retained; `score_parity_status=not_asserted_near_constant`. All structural checks remain strict. Ordinary score parity still uses `1e-10`; there is no score replacement, resampling, or increased tolerance. The regression test reproduces the archived call.
 
 Summary columns explicitly say `*_given_eligible` or `*_given_joint_eligible`. Report official finite, undefined, numerical-instability, exception and total-ineligible counts against all attempts. Reason incidence can overlap across arms; total ineligible is the union, not their sum.
 
@@ -74,7 +74,24 @@ python -m unittest discover -s tests -v
 python scripts/audit_quantus.py --output results/quantus-audit.json
 ```
 
-Use a fresh audit output path. Inspect package/source identity, check scope, failures and skipped checks; a missing dependency or skipped path is not a pass. New run counts and notebook verification will be recorded in [the current summary](../results/verification/summary.json). Full development and reserved confirmation remain unexecuted.
+Use a fresh audit output path. Inspect source identity, scope, failures and skipped checks; a missing dependency or skipped path is not a pass.
+
+**Observed canonical verification, 4 November 2026:**
+
+| Check | Result and scope |
+|---|---|
+| Public FC returns | 576 attempts: 559 finite = 555 eligible + 4 near-constant; 17 undefined; 0 exceptions. |
+| Public singleton FE | 12/12 eligible (4 inputs × 3 explanations). |
+| Structure / pairing | 588/588 public calls passed structural checks; 576/576 FC calls passed recorded-prefix checks. |
+| Score-parity classification | 584 passed **including undefined-status agreement**; 4 warned near-constant cases deferred. These are not 584 finite-score comparisons. |
+| Replay discrepancies | Maximum stable-case error `1.11e-15`. Maximum across all diagnostics `0.058028876269677176`, retained from the near-constant case. |
+| Exhaustive reference | 16/16 comparisons passed; maximum error `5.33e-15`, at declared teaching/first-input scope. |
+| Tests / separate audit | 27/27 tests and 34/34 audit checks passed; no failures or skips. |
+| Notebook replay | 5/5 unchanged actual code cells ran in a shared Python namespace. `scores.csv`, `population_scores.csv`, and `metric_calls.jsonl` were byte-identical to canonical smoke. |
+
+The notebook setup cell ran but reused the existing checkout/environment. This environment blocked Jupyter kernel startup with `Operation not permitted`; interactive Jupyter and hosted Colab clone/download/UI execution remain **unverified**. The notebook replay is verification of the same experiment, not a second reported result. [Full provenance and notebook record](../results/verification/summary.json)
+
+Full development and reserved confirmation remain unexecuted.
 
 **Research Learning Summary:** 필요성 → 공식 metric과 우리가 기록한 계산이 일치하는지 확인한다. 직관적인 예시/이해 → Quantus의 계산 과정을 옆에서 기록하고 같은 기록으로 다시 계산한다. 공식적인 정의 → public metric의 반환값은 결과, trace parity는 그 기록의 재현 점검이다. 근거/그게 되는 이유 → wrapper 오류는 탐지할 수 있지만, 두 계산의 일치만으로 설명 품질이나 일반적인 metric 신뢰성이 증명되지는 않는다.
 

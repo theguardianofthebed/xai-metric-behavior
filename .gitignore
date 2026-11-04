@@ -9,3 +9,6 @@ __pycache__/
 results/*/
 !results/verification/
 !results/verification/**
+
+# Immutable downloaded datasets (hashes and provenance are committed separately).
+data/cache/

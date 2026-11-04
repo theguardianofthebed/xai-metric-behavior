@@ -91,9 +91,12 @@ def quantus_call_context(seed_words: np.ndarray) -> Iterator[None]:
 
 class ScalarLogitModel(torch.nn.Module):
     """One-column scalar logit. Record what the official adapter really sees."""
-    def __init__(self, weights: np.ndarray):
+    def __init__(self, weights: np.ndarray, bias: float = 0.0):
         super().__init__()
         self.register_buffer("weights", torch.as_tensor(np.array(weights, dtype=np.float64), dtype=torch.float64))
+        if not np.isfinite(bias):
+            raise ValueError("the scalar model bias must be finite")
+        self.bias = float(bias)
         self.inputs: list[np.ndarray] = []
         self.outputs: list[np.ndarray] = []
         self.input_dtypes: list[str] = []
@@ -106,6 +109,10 @@ class ScalarLogitModel(torch.nn.Module):
         flat = value.reshape(value.shape[0], -1)
         self.inputs.append(flat.detach().cpu().numpy().copy())
         result = (flat * self.weights).sum(dim=1, keepdim=True)
+        # Preserve the original EXP-01 arithmetic when bias is exactly zero.
+        # EXP-01-R must expose the learned log-odds, including its intercept.
+        if self.bias != 0.0:
+            result = result + self.bias
         self.outputs.append(result.detach().cpu().numpy().copy())
         return result
 
@@ -142,6 +149,7 @@ class PublicScore:
     exception: str | None = None
     checks: dict[str, Any] = field(default_factory=dict)
     analysis_eligible: bool = False
+    exception_stage: str | None = None
 
 
 def _array_hash(*arrays: np.ndarray) -> str:
@@ -196,7 +204,8 @@ def _validate_trace(model: ScalarLogitModel, replacement: _ReplacementLog, pears
         raise RuntimeError("public score validity disagrees with its logged Pearson inputs")
     if not near_constant and reference.valid and abs(score - reference.score) > tolerance:
         raise RuntimeError("public score disagrees with independent trace replay")
-    if not np.allclose(outputs, np.sum(np.array(actual_after) * model.weights.numpy(), axis=1), atol=tolerance, rtol=0):
+    if not np.allclose(outputs, np.sum(np.array(actual_after) * model.weights.numpy(), axis=1) + model.bias,
+                       atol=tolerance, rtol=0):
         raise RuntimeError("actual model responses differ from the declared scalar logit")
     trace = {"subsets": subsets, "U": u, "V": v, "original_output": original,
              "perturbed_outputs": outputs, "model_inputs": np.concatenate(model.inputs, axis=0),
@@ -216,7 +225,7 @@ def _validate_trace(model: ScalarLogitModel, replacement: _ReplacementLog, pears
 
 def public_score(metric_name: str, x: np.ndarray, weights: np.ndarray, attribution: np.ndarray,
                  seed_words: np.ndarray, *, subset_size: int | None = None, budget: int | None = None,
-                 baseline: float = 0.0, tolerance: float = 1e-10) -> PublicScore:
+                 baseline: float = 0.0, tolerance: float = 1e-10, bias: float = 0.0) -> PublicScore:
     """Execute one input/explanation using public metric(...), logging all steps.
 
     FC's own np.random.choice selects masks. FE's own signed sort selects singleton
@@ -233,9 +242,10 @@ def public_score(metric_name: str, x: np.ndarray, weights: np.ndarray, attributi
     if metric_name == "FC" and (subset_size is None or budget is None):
         raise ValueError("FC requires subset_size and budget")
     replacement, pearson = _ReplacementLog(), _PearsonLog()
-    model = ScalarLogitModel(weights)
+    model = ScalarLogitModel(weights, bias=bias)
     recorded: list[Any] = []
     result = PublicScore(float("nan"), False, "not_attempted")
+    stage = "official_call"
     try:
         with quantus_call_context(seed_words), warnings.catch_warnings(record=True) as recorded:
             warnings.simplefilter("always")
@@ -254,6 +264,7 @@ def public_score(metric_name: str, x: np.ndarray, weights: np.ndarray, attributi
                               softmax=False, device="cpu", batch_size=1)
             result.score = float(returned[0])
             near_constant = any(item.category.__name__ == "NearConstantInputWarning" for item in recorded)
+            stage = "trace_validation"
             result.trace, result.checks, result.reason = _validate_trace(
                 model, replacement, pearson, x, a, np.zeros_like(x), draws, k, result.score, tolerance,
                 near_constant=near_constant)
@@ -262,6 +273,7 @@ def public_score(metric_name: str, x: np.ndarray, weights: np.ndarray, attributi
     except Exception as error:
         result.valid = False
         result.exception = f"{type(error).__name__}: {error}"
+        result.exception_stage = stage
         result.reason = f"exception:{type(error).__name__}"
         result.trace = {"model_inputs": np.concatenate(model.inputs, axis=0) if model.inputs else np.empty((0, len(x))),
                         "input_dtypes": model.input_dtypes,

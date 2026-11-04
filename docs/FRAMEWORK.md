@@ -50,7 +50,7 @@ Inputs and evaluator draws are different replication units. Many draws from one 
 | Experiment | Controlled question | Current role |
 |---|---|---|
 | **EXP-01** | Does subset size change the population score, the finite estimator, or both? | Quantus-centered implementation; [current design and execution evidence](EXP-01.md). |
-| **EXP-01-R** | How should the EXP-01 contract be adapted to real-data explanations? | **Atlas plan only.** No dataset, model training or real-XAI implementation is included here. |
+| **EXP-01-R** | Does the same population-versus-finite distinction hold for fixed Adult explanations and a learned additive model? | Adult, train-fitted logistic log-odds, actual Captum IG and official Quantus; [design and evidence](EXP-01-R.md). |
 | EXP-02 | What changes when explanation reference and evaluator baseline differ? | Proposed; do not assume every mismatch lowers correlation. |
 | EXP-03 | When do exact contribution allocations stop matching subset-deletion responses under interactions? | Proposed; distinguish additive nonlinear functions from interactions. |
 | EXP-04 | What information survives sign reversal or scaling? | Proposed representation controls. |

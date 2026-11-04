@@ -26,6 +26,17 @@ The package installation includes the required Quantus and scientific dependenci
 
 [Open in Colab](https://colab.research.google.com/github/theguardianofthebed/xai-metric-behavior/blob/exp01-atlas-protocol/notebooks/EXP-01.ipynb) or use the [local notebook](notebooks/EXP-01.ipynb). The notebook creates an isolated CPU environment and calls the same CLI package; its kernel only inspects saved outputs, with no second metric implementation. If the old first cell failed at `venv`, **reopen the updated notebook** and rerun that cell: it repairs a partial environment using `--without-pip` and target-only pip bootstrap. An already open Colab copy retains the old cell code.
 
+## Run EXP-01-R on Adult data
+
+[Open EXP-01-R in Colab](https://colab.research.google.com/github/theguardianofthebed/xai-metric-behavior/blob/exp01-atlas-protocol/notebooks/EXP-01-R.ipynb) in a fresh CPU runtime. For an existing isolated CLI environment:
+
+```bash
+python -m pip install -e '.[exp01r]'
+python -m xai_metric_behavior run-real --config configs/exp01r_smoke.yaml --output results/exp01r-smoke
+```
+
+This downloads hash-verified OpenXAI author CSVs, fits one model on training data, generates actual Captum IG, and measures official Quantus FC/FE. `rq_answer.txt` and the RQ figures answer whether k changes the population target or its finite estimate. Preserve the fitted model/partition cache when proceeding to development. [Compact contract, dataset provenance and limits](docs/EXP-01-R.md).
+
 ## Read the project
 
 | Document | Purpose |
@@ -36,7 +47,7 @@ The package installation includes the required Quantus and scientific dependenci
 | [Current verification](results/verification/) | Fresh Quantus execution evidence; full development and confirmation remain unexecuted. |
 | [Atlas reference](docs/ATLAS_REFERENCE.md) | Full revision-4 source context, including the conditional derivation. |
 
-The [live XAI Framework Atlas](https://timecapsule-traceability-atlas.iamlim0619.chatgpt.site) is the research map. **EXP-01-R remains an Atlas plan only**; this repository does not implement its proposed real-data experiment.
+The [live XAI Framework Atlas](https://timecapsule-traceability-atlas.iamlim0619.chatgpt.site) is the research map. **EXP-01-R** adds [real Adult data, a learned model and Captum IG](docs/EXP-01-R.md), using the same official Quantus measurement path. Its saved outputs directly compare population references with finite scores; confirmation remains reserved.
 
 ## Current evidence and boundaries
 

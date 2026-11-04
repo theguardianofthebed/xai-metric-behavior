@@ -4,5 +4,8 @@ __pycache__/
 .venv/
 .env
 .DS_Store
+*.egg-info/
+.ipynb_checkpoints/
 results/*/
-!results/README.md
+!results/verification/
+!results/verification/**

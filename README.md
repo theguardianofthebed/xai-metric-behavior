@@ -1,62 +1,46 @@
-# XAI Metric Behavior Lab — Phase 1 v0.1
+# XAI Metric Behavior
 
-A browser-first research scaffold for studying **how quantitative XAI evaluation metrics behave under controlled explanation changes**.
+**When and why do quantitative XAI metrics change their judgments?**
 
-## Core question
+This project studies metric behavior through controlled experiments: write down what a score measures, derive a prediction, retain the calculations behind the score, and test the prediction under reserved conditions. A changed score is not automatically evidence of a worse explanation or an invalid metric.
 
-> When the quality or structure of an explanation is changed in a known and controlled way, do quantitative XAI metrics respond in the expected way?
+The current starting point is **EXP-01: separate subset size from finite-sampling effects**. Its source is the [XAI Framework Atlas](https://timecapsule-traceability-atlas.iamlim0619.chatgpt.site), captured at revision 4 in this repository. The previous Phase 1 scaffold is preserved in [archive/phase1](archive/README.md).
 
-Phase 1 studies:
+## What EXP-01 asks
 
-- **Faithfulness / Co-12 Correctness**
-- **Compactness**
-- **Robustness / stability close to Co-12 Continuity**
+Faithfulness Correlation (FC) compares a subset's attribution sum with the model-output change caused by replacing those features. We vary:
 
-## Phase structure
+- **Subset size, $k$:** how many features the evaluator replaces in one draw.
+- **Sampling budget, $B$:** how many draws form one input's estimated correlation.
 
-- **P1-A Oracle:** synthetic tabular data, known linear classifier, exact attribution.
-- **P1-B Learned XAI:** the same task learned by an MLP, then explained with Captum.
-- **P1-C Real-data smoke test:** intentionally left for the next iteration.
+The model, input, explanation, baseline, and signed scalar target remain fixed within a comparison. In the declared additive setting, the **population** FC is mathematically independent of $k$. Finite estimates can still differ in bias, variance, and frequency of undefined results. Exact enumeration and paired repeated draws separate these effects. See the [design and implementation report](docs/EXP-01.md) for the assumptions and derivation.
 
-## Environment
+> **쉽게 말하면:** 같은 설명을 평가하더라도, 평가기가 한 번에 몇 개의 feature를 바꾸고 몇 번 반복하느냐에 따라 추정 점수가 흔들릴 수 있습니다. EXP-01은 모든 가능한 subset을 고려한 값과 실제로 일부만 뽑아 계산한 값을 구분합니다. 단순한 모델을 쓰는 이유는 이 두 값의 차이를 정확하게 설명하기 위해서입니다.
 
-- Python 3.12
-- GitHub = source of truth
-- Google Colab = experiment runner
-- Streamlit Community Cloud = result viewer
-- GitHub Codespaces = optional browser IDE
+## Run
 
-## Quick start
+Use Python 3.12 and run from the repository root:
 
 ```bash
-python -m pip install -r requirements-experiment.txt
 python -m pip install -e .
-pytest -q
-python scripts/run_oracle_phase1.py --config configs/phase1_quick.yaml
+python -m unittest discover -s tests -v
+python -m xai_metric_behavior run --config configs/exp01_smoke.yaml --output results/exp01-smoke
 ```
 
-P1-B:
+The experiment generates its own synthetic data and uses an explicit model formula; no dataset download, model training, or GPU is required. Use a new output directory for each run. The [notebook](notebooks/EXP-01.ipynb) walks through the same implementation. Full development and confirmation instructions are in the design report; confirmation requires a frozen prediction specification.
 
-```bash
-python scripts/run_learned_xai.py --config configs/phase1_quick.yaml
-```
+## Reading guide
 
-Public dashboard:
+| Read | Purpose |
+|---|---|
+| [Framework](docs/FRAMEWORK.md) | Research motivation, four stages, evidence rules, and the experiment roadmap. |
+| [EXP-01 design and implementation](docs/EXP-01.md) | Original Atlas protocol, design choices, code roles, execution, and failure report. |
+| [Quantus audit](docs/QUANTUS_AUDIT.md) | Pinned implementation semantics and the status of parity checks. |
+| [Atlas reference](docs/ATLAS_REFERENCE.md) | Full source context, organized by stable Atlas element ID. |
+| [Historical archive](archive/README.md) | Previous code and documents, separated from the current experiment. |
 
-```bash
-streamlit run app/streamlit_app.py
-```
+## Evidence boundary
 
-## Reproducibility rule
+**Derived** means a mathematical consequence under stated assumptions; **implemented** means code exists; **observed** requires an identified run; **proposed** and **unverified** remain separate. Current execution evidence belongs in the EXP-01 report, not in historical pilot numbers or Atlas status labels.
 
-Do not silently change a completed experiment configuration after viewing results. Create a new YAML file instead.
-
-Every run stores:
-
-- `raw_scores.csv`
-- `summary.csv`
-- `behavior_profiles.csv`
-- `resolved_config.yaml`
-- `run_metadata.json`
-
-No fabricated research results are included.
+The first study concerns feature-attribution Faithfulness. Compactness and Robustness/Continuity remain later extensions needing their own measurement definitions. This repository does not claim a universal metric, a universal ranking of explanations, or verified novelty of metric meta-evaluation.

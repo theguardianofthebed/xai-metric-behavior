@@ -1,0 +1,2 @@
+-r requirements.txt
+quantus==0.6.0

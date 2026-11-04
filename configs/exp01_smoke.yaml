@@ -1,0 +1,23 @@
+experiment_id: EXP-01
+phase: smoke
+dimension: 20
+weights: [2.5, -2.0, 1.5, 1.0, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+baseline: 0.0
+n_inputs: 4
+repetitions: 4
+subset_sizes: [1, 5, 10, 19]
+budgets: [5, 25, 100]
+seeds:
+  inputs: 2026110401
+  evaluator: 2026110402
+  analysis: 2026110403
+analysis:
+  numerical_tolerance: 1.0e-10
+  practical_tie_tolerance: 0.01
+  bootstrap_resamples: 200
+  confidence: 0.95
+enumeration:
+  enabled: true
+  n_inputs: 1
+  max_subsets: 250000
+write_traces: true

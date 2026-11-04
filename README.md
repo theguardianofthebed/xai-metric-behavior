@@ -19,15 +19,17 @@ The model, input, explanation, baseline, and signed scalar target remain fixed w
 
 ## Run
 
-Use Python 3.12 and run from the repository root:
+Use Python 3.12 and check out the `exp01-atlas-protocol` branch:
 
 ```bash
+git clone --branch exp01-atlas-protocol https://github.com/theguardianofthebed/xai-metric-behavior.git
+cd xai-metric-behavior
 python -m pip install -e .
 python -m unittest discover -s tests -v
 python -m xai_metric_behavior run --config configs/exp01_smoke.yaml --output results/exp01-smoke
 ```
 
-The experiment generates its own synthetic data and uses an explicit model formula; no dataset download, model training, or GPU is required. Use a new output directory for each run. The [notebook](notebooks/EXP-01.ipynb) walks through the same implementation. Full development and confirmation instructions are in the design report; confirmation requires a frozen prediction specification.
+The experiment generates its own synthetic data and uses an explicit model formula; no dataset download, model training, or GPU is required. Use a new output directory for each run. The [notebook](notebooks/EXP-01.ipynb) walks through the same implementation; you can also [open it in Colab](https://colab.research.google.com/github/theguardianofthebed/xai-metric-behavior/blob/exp01-atlas-protocol/notebooks/EXP-01.ipynb). Full development and confirmation instructions are in the design report; confirmation requires a frozen prediction specification.
 
 ## Reading guide
 
@@ -38,6 +40,10 @@ The experiment generates its own synthetic data and uses an explicit model formu
 | [Quantus audit](docs/QUANTUS_AUDIT.md) | Pinned implementation semantics and the status of parity checks. |
 | [Atlas reference](docs/ATLAS_REFERENCE.md) | Full source context, organized by stable Atlas element ID. |
 | [Historical archive](archive/README.md) | Previous code and documents, separated from the current experiment. |
+
+## Verification
+
+18 tests and 34 Quantus parity checks passed. The smoke run retained 547 valid and 29 undefined scores out of 576 attempts, with zero execution exceptions. Notebook code cells also reproduced the CLI scores. This environment blocked Jupyter socket binding, so the notebook UI remains unverified. Full development and reserved confirmation have not been run. See the [verification and failure report](docs/EXP-01.md#failure-report).
 
 ## Evidence boundary
 

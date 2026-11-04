@@ -23,6 +23,16 @@ Planned outputs are population score versus subset size; estimator error versus 
 
 ### Implementation supplement
 
+#### 먼저 이해할 핵심
+
+이 실험은 “같은 설명의 FC 점수가 달라졌다면, 가능한 subset 전체를 고려한 기준값이 변한 것인지, 일부만 뽑아서 생긴 추정 오차인지”를 구분합니다. 여기서 subset은 평가기가 모델 반응을 확인하려고 입력에서 선택하는 feature 묶음입니다. **k**는 한 번에 0으로 바꾸는 feature 수, **B**는 입력 하나의 점수를 계산할 때 뽑는 subset 수, **N**은 독립적으로 생성하여 평가하는 입력 수입니다. B를 늘리는 것과 N을 늘리는 것은 다른 실험 선택입니다.
+
+모델은 우리가 식을 정확히 아는 20개 feature의 단순한 scalar 함수이며, 그중 5개만 출력에 영향을 줍니다. 데이터를 직접 생성하고 모델을 학습시키지 않는 이유는 정답 기여도와 실제 출력 변화를 별도로 계산하여, 학습 오차가 섞이지 않게 하려는 것입니다. 모든 비교에서 설명할 scalar 출력의 정의, baseline 0, attribution의 부호를 유지합니다.
+
+**Exact**는 계산이 맞는지 확인하는 기준 설명입니다. **A**는 한 feature의 기여도를 쓰이지 않는 위치로 옮기고, **B**는 추가로 다른 기여도도 옮깁니다. 값의 분포와 0이 아닌 값의 개수는 유지하지만 배치가 잘못된 두 후보이므로, 점수 차이와 순위 변화를 비교할 수 있습니다. Exact만 사용하면 정의되는 점수가 항상 1이어서 sampling 영향을 충분히 볼 수 없습니다.
+
+이 조건에서는 **population FC**가 k에 따라 같아야 합니다. 그러나 B개만 뽑은 **finite estimate**는 흔들리거나, 뽑힌 값에 변화가 없어 correlation이 정의되지 않을 수 있습니다. 따라서 점수 변화를 곧바로 설명 품질 저하나 metric 실패로 해석하지 않고, 정확한 기준값·추정 오차·undefined 비율을 함께 확인합니다.
+
 #### 1. The measurement contract
 
 | Choice | Concrete rule | Why this choice answers the question |
@@ -154,15 +164,17 @@ The trace stores the largest budget once. Smaller budgets are prefixes of the sa
 
 #### 7. Execute the experiment
 
-Before this PR is merged, use the `exp01-atlas-protocol` branch. From the repository root, with Python 3.12:
+Use Python 3.12 and the `exp01-atlas-protocol` branch. Start from a new checkout with:
 
 ```bash
+git clone --branch exp01-atlas-protocol https://github.com/theguardianofthebed/xai-metric-behavior.git
+cd xai-metric-behavior
 python -m pip install -e .
 python -m unittest discover -s tests -v
 python -m xai_metric_behavior run --config configs/exp01_smoke.yaml --output results/exp01-smoke
 ```
 
-Start by reading the smoke manifest, failure counts, population check, and plots. The default experiment requires only CPU libraries; Quantus is a separate optional audit dependency. The notebook offers the same sequence with explanatory cells.
+Start by reading the smoke manifest, failure counts, population check, and plots. The default experiment requires only CPU libraries; Quantus is a separate optional audit dependency. The [notebook](../notebooks/EXP-01.ipynb) offers the same sequence with explanatory cells and can be [opened in Colab](https://colab.research.google.com/github/theguardianofthebed/xai-metric-behavior/blob/exp01-atlas-protocol/notebooks/EXP-01.ipynb).
 
 Run development after the smoke check:
 
@@ -193,19 +205,31 @@ A smaller estimation error is evidence about estimator precision under this cont
 
 ### Failure report
 
-<!-- EXECUTION_STATUS_BEGIN -->
+**Observed implementation verification — 4 November 2026.** The complete smoke artifacts, tests, and audit records are in [`results/verification/`](../results/verification/). The tested source tree is published as commit [`808bbdd`](https://github.com/theguardianofthebed/xai-metric-behavior/commit/808bbdd5c55a89b38ee60b0cc447262f67535c19). Raw manifests retain the original local verification commit `61ffdcff3f33732681d367724689e572f748a007` and full implementation hash. Later documentation edits do not change that numerical source.
 
-Execution evidence is being collected during implementation. Replace this block with identified run paths, actual check counts, observed discrepancies, and any environment/implementation failures before treating the report as complete.
-
-| Area | Evidence status |
+| Check | Observed result and scope |
 |---|---|
-| Mathematical prediction | **Derived** in Atlas HYP-01, conditional on the stated assumptions. |
-| Engine and verification checks | Implementation verification pending final recorded execution. |
-| Smoke/development outcomes | No outcome claimed in this draft. |
-| Quantus compatibility | See the separate audit for inspected source and executed/blocked parity status. |
-| Confirmation | **Unexecuted**; reserved conditions remain separate from development. |
+| Engine + optional integration tests | **18/18 passed**, no skipped tests in this environment. Tests include deliberate negative controls and failure-handling checks. |
+| Quantus 0.6.0 parity audit | **34/34 passed**, no skipped checks; largest score discrepancy `4.44e-16`. Actual public FC/FE calls and internal traces were compared. |
+| Smoke scores | **576 attempted; 547 valid; 29 undefined; 0 execution exceptions.** This is the small `N=4, R=4` configuration, not full development. |
+| Exact enumeration | **16/16 comparisons passed**; maximum discrepancy `5.329e-15`, against tolerance `1e-10`. Scope: the d=3 teaching fixture plus the first d=20 input at development subset sizes. |
+| Other analytical checks | Largest singleton FE discrepancy `1.110e-16`; pair-margin identity discrepancy `6.661e-16`; defined exact-anchor deviation from one `7.772e-16`. |
+| Notebook code | JSON/schema valid; all **5 actual code cells executed in order** in a shared Python namespace; resulting raw scores exactly matched the CLI run. This was not a Jupyter-kernel execution. |
+| Notebook kernel/UI | **Unverified:** this execution environment rejected both TCP and local IPC socket binding, so a Jupyter kernel could not start. Colab/Jupyter UI was not exercised. No experimental score was changed to work around this. |
+| GitHub setup access | **Resolved:** initial Git push authentication was unavailable and the connected integration returned HTTP 403, `Resource not accessible by integration`. After the user granted repository access, the connected installation listed `xai-metric-behavior` with push permission. This setup incident did not change experimental outputs. |
+| Full development and confirmation | **Unexecuted.** The production development grid and reserved d=20 confirmation settings remain for the researcher's next run. |
 
-<!-- EXECUTION_STATUS_END -->
+**Recorded failures and their handling:**
+
+| Category | What happened | Handling and interpretation |
+|---|---|---|
+| Finite-estimator degeneracy | At `B=5`, smoke had 17 undefined estimates at `k=1` and 12 at `k=19`. Reasons: constant response 17, both constant 10, constant attribution sums 2. | All 29 remain in `scores.csv` and `failures.csv`; comparisons record common validity. These are undefined Pearson values, not 29 low-faithfulness scores. This small smoke rate is not a population failure-rate claim. |
+| Resolved draft configuration error | Initial development/confirmation weight lists contained 22/21 entries instead of 20. | Strict validation rejected them before simulation; both were corrected to the exact Atlas vector, and the test suite passed. No research result was generated from the invalid lists. |
+| Upstream Quantus shape compatibility | Unmodified 0.6.0 FC rejects a valid `(N,d)` tabular call with `'subset_size' ... [5 >= 1.0]`. | The audit reproduces it and verifies `(N,1,d)` plus flattening in the scalar model. No scoring/validation monkeypatch is carried into this experiment. |
+| Baseline/default mismatch risk verified | Quantus `"black"` uses the input minimum; normalization and aggregation also have defaults unsuitable for this contract. | Explicit numeric `0.0`, signed/non-normalized attributions, scalar output, and per-input returns were verified. Historical pilot causes remain unverified. |
+| Verification environment limit | Both Jupyter TCP and local IPC kernel starts failed with `Operation not permitted`. | Code-cell order and real computations were tested through ordinary Python. Actual hosted notebook/UI execution remains a clearly stated verification limit. |
+
+These records establish a working implementation and identify the checks performed. They do not establish full-study uncertainty, held-out prediction success, real-data transfer, or universal metric reliability.
 
 **Failure interpretation rules:** a constant sampled attribution sum or model response makes Pearson undefined; this is an outcome of the finite estimator, not zero faithfulness. An exact-enumeration disagreement under verified premises is a calculation/derivation discrepancy to investigate. Missing packages or execution errors are implementation/environment failures. An inconclusive interval is a statistical limit. Record these separately, retaining attempted/valid/nonfinite/exception counts and reasons. A failure does not automatically establish that the metric is invalid.
 

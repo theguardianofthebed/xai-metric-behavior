@@ -7,6 +7,7 @@ __pycache__/
 *.egg-info/
 .ipynb_checkpoints/
 results/*/
+results/*.log
 !results/verification/
 !results/verification/**
 

@@ -3,11 +3,16 @@ from __future__ import annotations
 
 import argparse
 import json
-
-from .experiment import freeze_confirmation, run_experiment
+import os
 
 
 def main() -> None:
+    # The CLI writes figures to files. A notebook's inherited inline backend
+    # may not exist in this isolated interpreter, and Quantus imports pyplot
+    # eagerly. Select the file backend before importing the experiment engine.
+    os.environ["MPLBACKEND"] = "Agg"
+    from .experiment import freeze_confirmation, run_experiment
+
     parser = argparse.ArgumentParser(description="Atlas XAI experiments: population FC and finite-sampling behavior")
     commands = parser.add_subparsers(dest="command", required=True)
     run = commands.add_parser("run", help="Execute smoke/development or a previously frozen confirmation")

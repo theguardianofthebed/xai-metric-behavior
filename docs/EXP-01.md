@@ -71,6 +71,7 @@ Enumeration checks the teaching fixture and first 20-feature input at configured
 | **Verified — adapter/trace checks** | All **588 FC/FE calls** passed structural checks; **576 FC calls** passed recorded-draw pairing checks. Detailed parity classification is in the [audit](QUANTUS_AUDIT.md). |
 | **Fixed — Colab setup failure** | Cell 1 failed at `venv`, before Quantus. Reproduced locally without `ensurepip`; setup now creates a pipless environment, bootstraps target pip and repairs partial creation. The supplied traceback did not include the underlying stderr. |
 | **Fresh setup verified; hosted UI unverified** | New Python 3.13.11 environment: all five cells and smoke passed; three key files match canonical bytes. Missing-`ensurepip` creation/recovery/reuse also passed. [Record](../results/verification/colab_setup_validation_2026-11-05.json). Hosted Colab/Jupyter UI and notebook clone remain unverified. |
+| **Fixed — inherited notebook display backend** | Reproduced an execution-stage exit 1 on Python 3.13.17: Quantus imports Matplotlib before plotting, and the isolated environment cannot load an inherited `matplotlib_inline` backend. The CLI now selects `Agg` before imports; the notebook passes that setting only to the child and streams stdout/stderr to the cell and a complete sibling log. The supplied screenshot omitted the child traceback, so its exact hosted cause is not confirmed. [Reproduction and validation](../results/verification/colab_run_validation_2026-11-05.json). |
 
 **Eligibility:** preserve every official return; exclude undefined values, exceptions and upstream `NearConstantInputWarning` cases from statistical summaries. A finite return can still be ineligible. The rule was added after the first attempt; samples, scores and the $10^{-10}$ tolerance were preserved.
 
@@ -90,6 +91,8 @@ An enumeration discrepancy under verified premises requires investigating the ca
 
 **Verification:** 27/27 tests and 34/34 audit checks passed. Notebook execution is a verification replay of this smoke, not another research result. [Verification record](../results/verification/summary.json)
 
+**5 November runtime replay:** 33 tests (27 existing + 6 runtime regressions) passed. Python 3.13.17 completed the smoke under the previously failing inherited backend; five key output files match the canonical bytes. All five original notebook code cells passed through IPython, including three PNG displays, with parent packages/backend unchanged. Hosted Colab and interactive Jupyter UI remain unverified. [Runtime verification](../results/verification/colab_run_validation_2026-11-05.json).
+
 **Local CLI:** Python 3.12, CPU, from the repository root (Linux). No training, external dataset or GPU is needed.
 
 ```bash
@@ -101,6 +104,8 @@ python -m xai_metric_behavior run --config configs/exp01_smoke.yaml --output res
 ```
 
 [Clone instructions](../README.md#run-on-cpu) · [Open in Colab](https://colab.research.google.com/github/theguardianofthebed/xai-metric-behavior/blob/exp01-atlas-protocol/notebooks/EXP-01.ipynb). **Colab:** reopen the updated notebook in a CPU runtime and run its cells in order. Cell 1 creates or repairs `.venv` without requiring host `ensurepip`; kernel pip >=22.3 manages only the target environment. The notebook kernel is not upgraded. Use a new output directory per run. Keep the complete directory: manifest, raw scores, eligibility/failures, public-call records and traces. [Output map](../results/README.md)
+
+The execution cell also saves `results/exp01-<profile>-<timestamp>.log` beside the output directory, including failures that occur before a manifest can be created. Keep that log when reporting an error. The experiment uses the noninteractive `Agg` renderer before importing Quantus; the notebook retains its own inline display setting and displays the saved PNG figures. This runtime repair does not change the metric, configuration, seeds or eligibility rules.
 
 **Plot axes:** population FC versus k shows the first input; bias/RMSE versus B uses eligible scores. `analysis_ineligible_fraction.png` separates undefined and numerical-instability fractions, each divided by all attempts.
 

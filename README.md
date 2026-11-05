@@ -26,6 +26,8 @@ The package installation includes the required Quantus and scientific dependenci
 
 [Open in Colab](https://colab.research.google.com/github/theguardianofthebed/xai-metric-behavior/blob/exp01-atlas-protocol/notebooks/EXP-01.ipynb) or use the [local notebook](notebooks/EXP-01.ipynb). The notebook creates an isolated CPU environment and calls the same CLI package; its kernel only inspects saved outputs, with no second metric implementation. If the old first cell failed at `venv`, **reopen the updated notebook** and rerun that cell: it repairs a partial environment using `--without-pip` and target-only pip bootstrap. An already open Colab copy retains the old cell code.
 
+If the **run cell** failed with only `CalledProcessError`, reopen the updated notebook and run its cells in order. The experiment now selects its file-rendering backend before Quantus imports, so it does not inherit an unavailable notebook display backend. The run cell shows the complete child output and saves a sibling `results/exp01-<profile>-<timestamp>.log`; errors include their traceback, exit status and any saved diagnostic paths. [Reproduction and validation](results/verification/colab_run_validation_2026-11-05.json).
+
 ## Run EXP-01-R on Adult data
 
 [Open EXP-01-R in Colab](https://colab.research.google.com/github/theguardianofthebed/xai-metric-behavior/blob/exp01-atlas-protocol/notebooks/EXP-01-R.ipynb) in a fresh CPU runtime. For an existing isolated CLI environment:

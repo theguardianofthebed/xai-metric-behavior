@@ -1,0 +1,342 @@
+{
+  "report_date_local": "2026-11-05",
+  "report_date_timezone": "Asia/Seoul",
+  "recorded_at_utc": "2026-11-05T00:27:56.337385+00:00",
+  "status": "passed",
+  "purpose": "Runtime regression verification; not a new scientific experiment or held-out confirmation.",
+  "source_parent_commit": "1b8967b1de1a5300cced2ff01b5167799227cc24",
+  "reported_failure": {
+    "stage": "EXP-01 run cell, after setup",
+    "command": "<repo>/.venv/bin/python -m xai_metric_behavior run --config configs/exp01_smoke.yaml --output <new-output-directory>",
+    "returncode": 1,
+    "underlying_child_traceback_provided": false,
+    "exact_hosted_colab_cause_confirmed": false
+  },
+  "reproduced_failure": {
+    "python": "3.13.17",
+    "matplotlib": "3.10.8",
+    "matplotlib_inline_installed": false,
+    "inherited_MPLBACKEND": "module://matplotlib_inline.backend_inline",
+    "returncode": 1,
+    "output_directory_created": false,
+    "exception": "ValueError: Key backend: 'module://matplotlib_inline.backend_inline' is not a valid value for backend",
+    "mechanism": "Quantus eagerly imports matplotlib.pyplot; the inherited inline backend is unavailable in the isolated environment. The old plotting function selected Agg only after those imports.",
+    "traceback_file": "colab_run_before_fix_2026-11-05.log"
+  },
+  "repair": {
+    "cli": "Set MPLBACKEND=Agg inside main() before importing the experiment; importing the CLI module itself leaves notebook display unchanged.",
+    "notebook": "Copy the child environment and set Agg there; use unbuffered Python, stream stdout/stderr, preserve a complete exclusive sibling log, and raise with exit status/traceback/diagnostic paths.",
+    "scientific_changes": false,
+    "unchanged": [
+      "metric implementations",
+      "Quantus source checks",
+      "dependency pins",
+      "configs",
+      "seeds",
+      "sampling",
+      "reference calculations",
+      "eligibility rules",
+      "tolerances"
+    ],
+    "confirmation_conditions_consumed": false
+  },
+  "cli_validation": {
+    "returncode": 0,
+    "inherited_MPLBACKEND": "module://matplotlib_inline.backend_inline",
+    "key_outputs_match_canonical_bytes": {
+      "scores.csv": true,
+      "population_scores.csv": true,
+      "metric_calls.jsonl": true,
+      "exact_enumeration.csv": true,
+      "failures.csv": true
+    },
+    "figures": [
+      "analysis_ineligible_fraction.png",
+      "population_vs_subset_size.png",
+      "estimator_error_vs_budget.png"
+    ],
+    "run": {
+      "status": "completed",
+      "run_id": "57e892c0015f85e5",
+      "git": {
+        "commit": "1b8967b1de1a5300cced2ff01b5167799227cc24",
+        "branch": "exp01-atlas-protocol",
+        "tracked_worktree_dirty": true
+      },
+      "runtime": {
+        "python": "3.13.17",
+        "platform": "Linux-6.18.57-x86_64-with-glibc2.39",
+        "packages": {
+          "numpy": "2.3.5",
+          "scipy": "1.17.0",
+          "PyYAML": "6.0.3",
+          "matplotlib": "3.10.8",
+          "quantus": "0.6.0",
+          "torch": "2.10.0+cpu"
+        }
+      },
+      "implementation_sha256": "8edebacff689c8ba77780fac404ffd634e8fe5f7448106765fd135e25521fa71",
+      "config_sha256": "fdf7a41eafb8936e91216f55b28e39a96dd3d29af5d8e2c4dab5a032b05a4319",
+      "backend_execution_sha256": "24b1a68fa955ca392d0678147348536e653b9347d2dfb7eae619c1146582f96b",
+      "counts": {
+        "n_inputs": 4,
+        "repetitions_per_input": 4,
+        "n_planned_scores": 576,
+        "n_attempted_scores": 576,
+        "n_valid_scores": 559,
+        "n_nonfinite_scores": 17,
+        "n_official_finite_scores": 559,
+        "n_analysis_eligible_scores": 555,
+        "n_numerically_unstable_scores": 4,
+        "n_undefined_scores": 17,
+        "n_exception_scores": 0,
+        "n_exceptions": 0,
+        "n_failures_logged": 21,
+        "n_public_FC_calls": 576,
+        "n_public_FE_calls": 12,
+        "n_FE_official_finite": 12,
+        "n_FE_analysis_eligible": 12,
+        "n_FE_numerically_unstable": 0,
+        "n_FE_undefined": 0,
+        "n_trace_checks_passed": 588,
+        "n_pairing_checks_passed": 576,
+        "n_score_parity_passed": 584,
+        "n_score_parity_deferred_near_constant": 4,
+        "n_warning_records": 21
+      },
+      "validation": {
+        "enumeration_comparisons": 16,
+        "enumeration_all_passed": true,
+        "max_enumeration_absolute_error": 5.329070518200751e-15,
+        "max_singleton_FE_coordinate_error_eligible_inputs": 3.3306690738754696e-16,
+        "max_singleton_FE_coordinate_error_all_finite": 3.3306690738754696e-16,
+        "max_fixed_pair_margin_identity_error": 6.661338147750939e-16,
+        "numerical_tolerance": 1e-10,
+        "d20_enumeration_scope": "first input at configured subset sizes only",
+        "max_eligible_exact_anchor_error": 5.551115123125783e-16,
+        "max_public_trace_replay_absolute_error_all_diagnostics": 0.058028876269677176,
+        "max_stable_public_trace_replay_absolute_error": 1.1102230246251565e-15,
+        "actual_pairing_checks": 576,
+        "all_FC_calls_paired": true,
+        "public_FE_calls": 12,
+        "all_public_calls_trace_checked": true,
+        "all_public_calls_score_parity_classified": true
+      }
+    },
+    "stdout_stderr_file": "colab_run_after_fix_2026-11-05.log"
+  },
+  "notebook_validation": {
+    "status": "passed",
+    "execution": "original notebook code cells through IPython InteractiveShell with the inherited inline backend; no Jupyter transport",
+    "hosted_colab_verified": false,
+    "interactive_jupyter_verified": false,
+    "jupyter_attempt_limitation": "The local executor denied both TCP and IPC socket binds before kernel startup; no notebook cell was run in that attempt.",
+    "kernel_python": "3.13.17",
+    "kernel_backend_before": "module://matplotlib_inline.backend_inline",
+    "kernel_backend_after": "module://matplotlib_inline.backend_inline",
+    "kernel_packages_unchanged": true,
+    "fresh_experiment_environment": false,
+    "initial_setup_evidence": "initial-cell-2.log: fresh pipless creation, bootstrap and install completed before this reuse replay",
+    "initial_fixture_attempt": "Code cells 2,4,6,8 passed including the full smoke and 3 PNG displays; cell 10 required preinstalled kernel NumPy. NumPy was added to the local kernel fixture before this final replay, matching the notebook prerequisite; no notebook code was changed for this.",
+    "notebook_sha256": "8263ad9f1478d9473a402734cf79a3eb6317d75c0586f827007650394fd20b31",
+    "cells": [
+      {
+        "index": 2,
+        "success": true,
+        "elapsed_seconds": 2.51,
+        "display_mimetypes": []
+      },
+      {
+        "index": 4,
+        "success": true,
+        "elapsed_seconds": 0.0,
+        "display_mimetypes": []
+      },
+      {
+        "index": 6,
+        "success": true,
+        "elapsed_seconds": 9.4,
+        "display_mimetypes": []
+      },
+      {
+        "index": 8,
+        "success": true,
+        "elapsed_seconds": 0.01,
+        "display_mimetypes": [
+          [
+            "text/plain",
+            "text/markdown"
+          ],
+          [
+            "text/plain",
+            "text/markdown"
+          ],
+          [
+            "text/plain",
+            "text/markdown"
+          ],
+          [
+            "text/plain",
+            "text/markdown"
+          ],
+          [
+            "text/plain",
+            "text/markdown"
+          ],
+          [
+            "text/plain",
+            "text/markdown"
+          ],
+          [
+            "text/plain",
+            "text/markdown"
+          ],
+          [
+            "text/plain",
+            "text/markdown"
+          ],
+          [
+            "text/plain",
+            "text/markdown"
+          ],
+          [
+            "image/png",
+            "text/plain"
+          ],
+          [
+            "text/plain",
+            "text/markdown"
+          ],
+          [
+            "image/png",
+            "text/plain"
+          ],
+          [
+            "text/plain",
+            "text/markdown"
+          ],
+          [
+            "image/png",
+            "text/plain"
+          ]
+        ]
+      },
+      {
+        "index": 10,
+        "success": true,
+        "elapsed_seconds": 0.18,
+        "display_mimetypes": []
+      }
+    ],
+    "output_directory": "/workspace/scratch/c37576c9942b/colab-repro/notebook-checkout/results/exp01-smoke-20261105T002708_672178Z",
+    "log_path": "/workspace/scratch/c37576c9942b/colab-repro/notebook-checkout/results/exp01-smoke-20261105T002708_672178Z.log",
+    "key_outputs_match_canonical": {
+      "scores.csv": true,
+      "population_scores.csv": true,
+      "metric_calls.jsonl": true,
+      "exact_enumeration.csv": true,
+      "failures.csv": true
+    },
+    "elapsed_seconds": 12.11,
+    "run": {
+      "status": "completed",
+      "run_id": "6f7c0f9838cce3b5",
+      "git": {
+        "commit": "1b8967b1de1a5300cced2ff01b5167799227cc24",
+        "branch": "exp01-atlas-protocol",
+        "tracked_worktree_dirty": true
+      },
+      "runtime": {
+        "python": "3.13.17",
+        "platform": "Linux-6.18.57-x86_64-with-glibc2.39",
+        "packages": {
+          "numpy": "2.3.5",
+          "scipy": "1.17.0",
+          "PyYAML": "6.0.3",
+          "matplotlib": "3.10.8",
+          "quantus": "0.6.0",
+          "torch": "2.10.0+cpu"
+        }
+      },
+      "implementation_sha256": "8edebacff689c8ba77780fac404ffd634e8fe5f7448106765fd135e25521fa71",
+      "config_sha256": "fdf7a41eafb8936e91216f55b28e39a96dd3d29af5d8e2c4dab5a032b05a4319",
+      "backend_execution_sha256": "24b1a68fa955ca392d0678147348536e653b9347d2dfb7eae619c1146582f96b",
+      "counts": {
+        "n_inputs": 4,
+        "repetitions_per_input": 4,
+        "n_planned_scores": 576,
+        "n_attempted_scores": 576,
+        "n_valid_scores": 559,
+        "n_nonfinite_scores": 17,
+        "n_official_finite_scores": 559,
+        "n_analysis_eligible_scores": 555,
+        "n_numerically_unstable_scores": 4,
+        "n_undefined_scores": 17,
+        "n_exception_scores": 0,
+        "n_exceptions": 0,
+        "n_failures_logged": 21,
+        "n_public_FC_calls": 576,
+        "n_public_FE_calls": 12,
+        "n_FE_official_finite": 12,
+        "n_FE_analysis_eligible": 12,
+        "n_FE_numerically_unstable": 0,
+        "n_FE_undefined": 0,
+        "n_trace_checks_passed": 588,
+        "n_pairing_checks_passed": 576,
+        "n_score_parity_passed": 584,
+        "n_score_parity_deferred_near_constant": 4,
+        "n_warning_records": 21
+      },
+      "validation": {
+        "enumeration_comparisons": 16,
+        "enumeration_all_passed": true,
+        "max_enumeration_absolute_error": 5.329070518200751e-15,
+        "max_singleton_FE_coordinate_error_eligible_inputs": 3.3306690738754696e-16,
+        "max_singleton_FE_coordinate_error_all_finite": 3.3306690738754696e-16,
+        "max_fixed_pair_margin_identity_error": 6.661338147750939e-16,
+        "numerical_tolerance": 1e-10,
+        "d20_enumeration_scope": "first input at configured subset sizes only",
+        "max_eligible_exact_anchor_error": 5.551115123125783e-16,
+        "max_public_trace_replay_absolute_error_all_diagnostics": 0.058028876269677176,
+        "max_stable_public_trace_replay_absolute_error": 1.1102230246251565e-15,
+        "actual_pairing_checks": 576,
+        "all_FC_calls_paired": true,
+        "public_FE_calls": 12,
+        "all_public_calls_trace_checked": true,
+        "all_public_calls_score_parity_classified": true
+      }
+    }
+  },
+  "regression_tests": {
+    "command": ".venv/bin/python -m pytest tests/test_exp01.py tests/test_quantus_backend.py tests/test_quantus_parity.py tests/test_cli_runtime.py tests/test_notebook_runner.py -q",
+    "status": "passed",
+    "total_tests": 33,
+    "subtests": 7,
+    "existing_exp01_tests": 27,
+    "new_runtime_tests": 6,
+    "cases": [
+      "CLI starts with unavailable parent display backend",
+      "CLI import preserves notebook display",
+      "live stdout/stderr streaming before child exit",
+      "child-only backend override",
+      "nonzero status/traceback/failure-artifact retention",
+      "launch failure diagnostics",
+      "exclusive log protection"
+    ]
+  },
+  "source_file_sha256": {
+    "notebooks/EXP-01.ipynb": "6d2caf59ec375f4f7e1a45f934f76a55efc7147b74a0d9c48c5c207f6a44a521",
+    "src/xai_metric_behavior/__main__.py": "3ca7a83467f4f0b993387e6ff16e38654706fabf6a14feafeef0f5a8bfbc28aa",
+    "tests/test_cli_runtime.py": "d4f7cd6a1a3affd10f40ccd05ec25137e87629162927a9cf05d8cbd1980ba985",
+    "tests/test_notebook_runner.py": "24321524fe07913faeea2fe316c6896dcc6aad836158f5e3d03ca09f77a38e66"
+  },
+  "scope_limits": [
+    "The screenshot omitted the original child stderr; the exact failure on the user runtime is not confirmed.",
+    "Hosted Colab UI was not exercised. Local Jupyter transport could not start because socket binds are denied; original cells were verified via IPython instead.",
+    "Smoke verifies execution and recorded-output preservation, not general metric reliability or confirmation."
+  ],
+  "references": [
+    "https://matplotlib.org/3.10.8/users/explain/figure/backends.html",
+    "https://github.com/ipython/ipykernel/blob/main/ipykernel/kernelapp.py"
+  ]
+}

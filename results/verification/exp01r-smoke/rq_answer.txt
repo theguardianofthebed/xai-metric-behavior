@@ -1,0 +1,37 @@
+EXP-01-R / SMOKE — direct RQ answer
+On fixed Adult explanations, does subset size k change population FC, or only its finite estimate from B sampled groups?
+
+POPULATION (derived, with independent enumeration):
+Under the stated additive log-odds and uniform-subset contract, the population value is k-invariant (derived). Enumeration tests that identity on the first selected input at allowed k only.
+  Enumeration comparisons with defined references: 12/12.
+  Maximum enumeration/reference error: 1.39e-16.
+  Maximum enumerated population spread across k: 2.22e-16.
+
+FINITE QUANTUS ESTIMATES (observed):
+Quantus scores are finite-sample estimates. Their errors and any reversals below describe this run; a larger B need not improve every individual score.
+  B | RMSE of controls A/B | joint input-repeats across every k/B/control
+    5 | 0.475097 | 16/16
+   25 | 0.157345 | 16/16
+  100 | 0.076164 | 16/16
+  RMSE averages paired repetitions/settings within each input, then gives inputs equal weight.
+  Official FC: 576 attempts; 576 eligible; 0 undefined; 0 near-constant; 0 exceptions.
+  Undefined and near-constant counts are reason incidences and can overlap; raw returns are retained.
+
+PAIRWISE A/B DIAGNOSTIC:
+  k / B | strict reversals / jointly eligible decisive-margin pairs | all attempted pairs
+   1 /   5 | 5/16 | 16
+   1 /  25 | 3/16 | 16
+   1 / 100 | 2/16 | 16
+   5 /   5 | 5/16 | 16
+   5 /  25 | 1/16 | 16
+   5 / 100 | 1/16 | 16
+  10 /   5 | 6/16 | 16
+  10 /  25 | 5/16 | 16
+  10 / 100 | 2/16 | 16
+  12 /   5 | 7/16 | 16
+  12 /  25 | 1/16 | 16
+  12 / 100 | 0/16 | 16
+  Population ties and finite ties remain separate in the CSVs; A>B was never assumed.
+
+SCOPE: observed_smoke_not_confirmation
+One fitted additive model; encoded-coordinate interventions can be off the data support. Labels are income outcomes, not explanation ground truth. No universal metric claim or held-out result.

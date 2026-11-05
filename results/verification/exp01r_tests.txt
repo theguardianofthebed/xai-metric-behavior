@@ -1,0 +1,105 @@
+test_additive_nonlinear_identity_by_exact_enumeration (test_exp01.MeasurementContractTests.test_additive_nonlinear_identity_by_exact_enumeration) ... ok
+test_common_eligibility_precedes_condition_averaging (test_exp01.MeasurementContractTests.test_common_eligibility_precedes_condition_averaging) ... ok
+test_interaction_is_a_boundary_not_a_theorem_refutation (test_exp01.MeasurementContractTests.test_interaction_is_a_boundary_not_a_theorem_refutation) ... ok
+test_nonuniform_sampling_changes_the_reference_population (test_exp01.MeasurementContractTests.test_nonuniform_sampling_changes_the_reference_population) ... ok
+test_pairing_preserves_subsets_and_budget_prefixes (test_exp01.MeasurementContractTests.test_pairing_preserves_subsets_and_budget_prefixes) ... ok
+test_relocation_pair_preserves_values_and_has_derived_margin (test_exp01.MeasurementContractTests.test_relocation_pair_preserves_values_and_has_derived_margin) ... ok
+test_tie_and_undefined_states_are_distinct (test_exp01.MeasurementContractTests.test_tie_and_undefined_states_are_distinct) ... ok
+test_undefined_cases_are_not_zero_scores (test_exp01.MeasurementContractTests.test_undefined_cases_are_not_zero_scores) ... ok
+test_warned_finite_scores_are_preserved_but_excluded_from_paired_analysis (test_exp01.MeasurementContractTests.test_warned_finite_scores_are_preserved_but_excluded_from_paired_analysis) ... ok
+test_worked_toy_has_hand_computed_trace (test_exp01.MeasurementContractTests.test_worked_toy_has_hand_computed_trace) ... ok
+test_config_rejects_silent_contract_changes (test_exp01.ProvenanceTests.test_config_rejects_silent_contract_changes) ... ok
+test_failure_preserves_counts_and_diagnostic (test_exp01.ProvenanceTests.test_failure_preserves_counts_and_diagnostic) ... ok
+test_freeze_never_runs_reserved_conditions_and_rejects_changes (test_exp01.ProvenanceTests.test_freeze_never_runs_reserved_conditions_and_rejects_changes) ... ok
+test_replay_outputs_traces_and_no_clobber (test_exp01.ProvenanceTests.test_replay_outputs_traces_and_no_clobber) ... ok
+test_warned_return_survives_runner_without_entering_conditional_statistics (test_exp01.ProvenanceTests.test_warned_return_survives_runner_without_entering_conditional_statistics) ... ok
+test_actual_captum_ig_includes_bias_in_output_but_not_contributions (test_exp01r_data.AdultContractTests.test_actual_captum_ig_includes_bias_in_output_but_not_contributions) ... ok
+test_completeness_alone_does_not_pass_coordinate_errors (test_exp01r_data.AdultContractTests.test_completeness_alone_does_not_pass_coordinate_errors) ... ok
+test_confirmation_is_blocked_before_source_access (test_exp01r_data.AdultContractTests.test_confirmation_is_blocked_before_source_access) ... ok
+test_development_cannot_silently_fit_another_model (test_exp01r_data.AdultContractTests.test_development_cannot_silently_fit_another_model) ... ok
+test_one_fitted_model_is_reused_and_mismatches_stop (test_exp01r_data.AdultContractTests.test_one_fitted_model_is_reused_and_mismatches_stop) ... ok
+test_reservation_cache_rejects_changed_seed_and_corrupted_ids (test_exp01r_data.AdultContractTests.test_reservation_cache_rejects_changed_seed_and_corrupted_ids) ... ok
+test_reservations_are_disjoint_and_do_not_change_global_rng (test_exp01r_data.AdultContractTests.test_reservations_are_disjoint_and_do_not_change_global_rng) ... ok
+test_scaler_is_fit_on_training_rows_and_positive_class_is_preserved (test_exp01r_data.AdultContractTests.test_scaler_is_fit_on_training_rows_and_positive_class_is_preserved) ... ok
+test_source_checksum_and_schema_fail_without_silent_replacement (test_exp01r_data.AdultContractTests.test_source_checksum_and_schema_fail_without_silent_replacement) ... ok
+test_budget_error_uses_common_eligible_repeats_and_equal_input_weights (test_exp01r_engine.RealEngineTests.test_budget_error_uses_common_eligible_repeats_and_equal_input_weights) ... ok
+test_nonzero_intercept_is_exposed_in_actual_public_fc_and_fe_traces (test_exp01r_engine.RealEngineTests.test_nonzero_intercept_is_exposed_in_actual_public_fc_and_fe_traces) ... ok
+test_pairing_guard_saves_official_return_and_partial_trace_before_halting (test_exp01r_engine.RealEngineTests.test_pairing_guard_saves_official_return_and_partial_trace_before_halting) ... ok
+test_public_runner_records_actual_calls_intercept_and_direct_answer (test_exp01r_engine.RealEngineTests.test_public_runner_records_actual_calls_intercept_and_direct_answer) ... EXP-01-R / SMOKE — direct RQ answer
+On fixed Adult explanations, does subset size k change population FC, or only its finite estimate from B sampled groups?
+
+POPULATION (derived, with independent enumeration):
+Under the stated additive log-odds and uniform-subset contract, the population value is k-invariant (derived). Enumeration tests that identity on the first selected input at allowed k only.
+  Enumeration comparisons with defined references: 6/6.
+  Maximum enumeration/reference error: 1.11e-16.
+  Maximum enumerated population spread across k: 1.11e-16.
+
+FINITE QUANTUS ESTIMATES (observed):
+Quantus scores are finite-sample estimates. Their errors and any reversals below describe this run; a larger B need not improve every individual score.
+  B | RMSE of controls A/B | joint input-repeats across every k/B/control
+    5 | 0.416960 | 8/8
+   10 | 0.268914 | 8/8
+  RMSE averages paired repetitions/settings within each input, then gives inputs equal weight.
+  Official FC: 96 attempts; 96 eligible; 0 undefined; 0 near-constant; 0 exceptions.
+  Undefined and near-constant counts are reason incidences and can overlap; raw returns are retained.
+
+PAIRWISE A/B DIAGNOSTIC:
+  k / B | strict reversals / jointly eligible decisive-margin pairs | all attempted pairs
+   1 /   5 | 0/8 | 8
+   1 /  10 | 0/8 | 8
+   5 /   5 | 4/8 | 8
+   5 /  10 | 3/8 | 8
+  Population ties and finite ties remain separate in the CSVs; A>B was never assumed.
+
+SCOPE: observed_smoke_not_confirmation
+One fitted additive model; encoded-coordinate interventions can be off the data support. Labels are income outcomes, not explanation ground truth. No universal metric claim or held-out result.
+
+ok
+test_real_upstream_all_negative_rejections_are_retained_without_resampling (test_exp01r_engine.RealEngineTests.test_real_upstream_all_negative_rejections_are_retained_without_resampling) ... EXP-01-R / SMOKE — direct RQ answer
+On fixed Adult explanations, does subset size k change population FC, or only its finite estimate from B sampled groups?
+
+POPULATION (derived, with independent enumeration):
+Under the stated additive log-odds and uniform-subset contract, the population value is k-invariant (derived). Enumeration tests that identity on the first selected input at allowed k only.
+  Enumeration comparisons with defined references: 6/6.
+  Maximum enumeration/reference error: 1.11e-16.
+  Maximum enumerated population spread across k: 1.39e-16.
+
+FINITE QUANTUS ESTIMATES (observed):
+Quantus scores are finite-sample estimates. Their errors and any reversals below describe this run; a larger B need not improve every individual score.
+  B | RMSE of controls A/B | joint input-repeats across every k/B/control
+    5 | 0.450086 | 6/8
+   10 | 0.294816 | 6/8
+  RMSE averages paired repetitions/settings within each input, then gives inputs equal weight.
+  Official FC: 96 attempts; 72 eligible; 0 undefined; 0 near-constant; 24 exceptions.
+  Undefined and near-constant counts are reason incidences and can overlap; raw returns are retained.
+
+PAIRWISE A/B DIAGNOSTIC:
+  k / B | strict reversals / jointly eligible decisive-margin pairs | all attempted pairs
+   1 /   5 | 0/6 | 8
+   1 /  10 | 0/6 | 8
+   5 /   5 | 3/6 | 8
+   5 /  10 | 3/6 | 8
+  Population ties and finite ties remain separate in the CSVs; A>B was never assumed.
+
+SCOPE: observed_smoke_not_confirmation
+One fitted additive model; encoded-coordinate interventions can be off the data support. Labels are income outcomes, not explanation ground truth. No universal metric claim or held-out result.
+
+ok
+test_reserved_and_unknown_contract_rejected_before_preparation (test_exp01r_engine.RealEngineTests.test_reserved_and_unknown_contract_rejected_before_preparation) ... ok
+test_global_rng_and_dtype_restore_after_success_and_public_exception (test_quantus_backend.PublicQuantusBackendTests.test_global_rng_and_dtype_restore_after_success_and_public_exception) ... ok
+test_native_draws_are_paired_across_candidates_k_and_budget (test_quantus_backend.PublicQuantusBackendTests.test_native_draws_are_paired_across_candidates_k_and_budget) ... ok
+test_real_public_constant_response_retains_nan_reason_and_warning (test_quantus_backend.PublicQuantusBackendTests.test_real_public_constant_response_retains_nan_reason_and_warning) ... ok
+test_real_public_fc_and_fe_preserve_non_dyadic_float64_inputs (test_quantus_backend.PublicQuantusBackendTests.test_real_public_fc_and_fe_preserve_non_dyadic_float64_inputs) ... ok
+test_real_public_validation_exception_has_no_numpy_score_fallback (test_quantus_backend.PublicQuantusBackendTests.test_real_public_validation_exception_has_no_numpy_score_fallback) ... ok
+test_recorded_near_constant_smoke_value_is_preserved_but_ineligible (test_quantus_backend.PublicQuantusBackendTests.test_recorded_near_constant_smoke_value_is_preserved_but_ineligible) ... ok
+test_repeat_seed_reproduces_draws_and_fresh_repeat_changes_them (test_quantus_backend.PublicQuantusBackendTests.test_repeat_seed_reproduces_draws_and_fresh_repeat_changes_them) ... ok
+test_actual_evaluate_batch_matches_numpy_reference (test_quantus_parity.QuantusParityTests.test_actual_evaluate_batch_matches_numpy_reference) ... ok
+test_perturbation_and_undefined_correlation (test_quantus_parity.QuantusParityTests.test_perturbation_and_undefined_correlation) ... ok
+test_pinned_source_identity (test_quantus_parity.QuantusParityTests.test_pinned_source_identity) ... ok
+test_public_api_matches_and_retains_expected_2d_failure (test_quantus_parity.QuantusParityTests.test_public_api_matches_and_retains_expected_2d_failure) ... ok
+test_upstream_shape_limit_is_explicit (test_quantus_parity.QuantusParityTests.test_upstream_shape_limit_is_explicit) ... ok
+
+----------------------------------------------------------------------
+Ran 42 tests in 2.358s
+
+OK

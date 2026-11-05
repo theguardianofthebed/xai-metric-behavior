@@ -1,0 +1,13 @@
+k,budget,n_pair_attempts,n_joint_eligible,n_ineligible,n_joint_eligible_with_decisive_population_margin,n_joint_eligible_with_population_tie_or_undefined,strict_reversal_count,reversal_rate_given_decisive_joint_eligible_equal_inputs,reversal_fraction_all_pair_attempts,finite_tie_count_given_joint_eligible,practical_tie_tolerance,interpretation
+1,5,16,16,0,16,0,5,0.3125,0.3125,1,0.01,conditional diagnostic; a near-zero population margin is not a decisive ranking
+1,25,16,16,0,16,0,3,0.1875,0.1875,0,0.01,conditional diagnostic; a near-zero population margin is not a decisive ranking
+1,100,16,16,0,16,0,2,0.125,0.125,0,0.01,conditional diagnostic; a near-zero population margin is not a decisive ranking
+5,5,16,16,0,16,0,5,0.3125,0.3125,0,0.01,conditional diagnostic; a near-zero population margin is not a decisive ranking
+5,25,16,16,0,16,0,1,0.0625,0.0625,0,0.01,conditional diagnostic; a near-zero population margin is not a decisive ranking
+5,100,16,16,0,16,0,1,0.0625,0.0625,1,0.01,conditional diagnostic; a near-zero population margin is not a decisive ranking
+10,5,16,16,0,16,0,6,0.375,0.375,1,0.01,conditional diagnostic; a near-zero population margin is not a decisive ranking
+10,25,16,16,0,16,0,5,0.3125,0.3125,0,0.01,conditional diagnostic; a near-zero population margin is not a decisive ranking
+10,100,16,16,0,16,0,2,0.125,0.125,0,0.01,conditional diagnostic; a near-zero population margin is not a decisive ranking
+12,5,16,16,0,16,0,7,0.4375,0.4375,0,0.01,conditional diagnostic; a near-zero population margin is not a decisive ranking
+12,25,16,16,0,16,0,1,0.0625,0.0625,0,0.01,conditional diagnostic; a near-zero population margin is not a decisive ranking
+12,100,16,16,0,16,0,0,0.0,0.0,3,0.01,conditional diagnostic; a near-zero population margin is not a decisive ranking

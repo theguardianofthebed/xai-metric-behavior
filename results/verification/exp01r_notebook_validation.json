@@ -1,0 +1,84 @@
+{
+  "notebook": "notebooks/EXP-01-R.ipynb",
+  "notebook_sha256": "54466a25c265f2a55d131b09deafb1ed7fc66d96438d6895442950acc36f296c",
+  "validation_mode": "All actual code cells, unchanged, shared namespace in an external Python kernel; existing checkout/environment and frozen data/model/partition cache reused.",
+  "hosted_colab_ui_verified": false,
+  "fresh_clone_path_verified_in_this_check": false,
+  "fresh_environment_bootstrap_verified_in_this_check": false,
+  "kernel_python": "3.13.11 (main, Jan 28 2026, 00:01:45) [Clang 21.1.4 ]",
+  "cells": [
+    {
+      "index": 2,
+      "status": "passed",
+      "seconds": 2.6519121490000543
+    },
+    {
+      "index": 4,
+      "status": "passed",
+      "seconds": 0.00022646100023848703
+    },
+    {
+      "index": 6,
+      "status": "passed",
+      "seconds": 11.728058860999681
+    },
+    {
+      "index": 8,
+      "status": "passed",
+      "seconds": 0.045378685999821755
+    },
+    {
+      "index": 10,
+      "status": "passed",
+      "seconds": 0.002616672999920411
+    }
+  ],
+  "status": "passed",
+  "replay_output": "results/exp01r-smoke-20261104T234718_911810Z",
+  "replay_run_id": "68c07f91f3b00f8f",
+  "replay_status": "completed",
+  "source_git": {
+    "commit": "1b8967b1de1a5300cced2ff01b5167799227cc24",
+    "branch": "exp01-atlas-protocol",
+    "tracked_worktree_dirty": false
+  },
+  "model_reused": true,
+  "canonical_comparisons": [
+    {
+      "file": "scores.csv",
+      "canonical_sha256": "79518f93c1709e00fad2ebcfdd9159e79ae51679df2b44a38440b31b25d107e2",
+      "replay_sha256": "79518f93c1709e00fad2ebcfdd9159e79ae51679df2b44a38440b31b25d107e2",
+      "byte_identical": true
+    },
+    {
+      "file": "population_scores.csv",
+      "canonical_sha256": "68c842803b3a295c3cda4f58b013e8370dd56a4303bd5ba6757095f1e38aa6f4",
+      "replay_sha256": "68c842803b3a295c3cda4f58b013e8370dd56a4303bd5ba6757095f1e38aa6f4",
+      "byte_identical": true
+    },
+    {
+      "file": "exact_enumeration.csv",
+      "canonical_sha256": "dfcce01cd2b48ab038ef715e914dd1a3c87a7f0557db80e82b4bc3a9d6a572cf",
+      "replay_sha256": "dfcce01cd2b48ab038ef715e914dd1a3c87a7f0557db80e82b4bc3a9d6a572cf",
+      "byte_identical": true
+    },
+    {
+      "file": "ig_checks.csv",
+      "canonical_sha256": "3749e4ad707ca4922e49b9ca4e0964d2993ca2ba6b52f6231f1ec316502c961c",
+      "replay_sha256": "3749e4ad707ca4922e49b9ca4e0964d2993ca2ba6b52f6231f1ec316502c961c",
+      "byte_identical": true
+    },
+    {
+      "file": "rq_answer.json",
+      "canonical_sha256": "4c20473b577add82bf70f995e3778d6490b536700ea1539d25d2acc8de3a1840",
+      "replay_sha256": "4c20473b577add82bf70f995e3778d6490b536700ea1539d25d2acc8de3a1840",
+      "byte_identical": true
+    },
+    {
+      "file": "rq_answer.txt",
+      "canonical_sha256": "d3f1b9befa5e46baa3c5e8a34da78abe2a26a003cc7196c8b9c755130862d1a8",
+      "replay_sha256": "d3f1b9befa5e46baa3c5e8a34da78abe2a26a003cc7196c8b9c755130862d1a8",
+      "byte_identical": true
+    }
+  ]
+}

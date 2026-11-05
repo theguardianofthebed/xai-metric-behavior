@@ -1,0 +1,4 @@
+budget,rmse_nonexact_controls_given_joint_all_settings,n_inputs_attempted,n_inputs_with_reference_and_joint_repeats,n_input_repetitions_attempted,n_input_repetitions_joint_all_settings,n_input_repetitions_excluded,joint_scope,aggregation
+5,0.4750974848805268,4,4,16,16,0,A and B; every declared subset size and budget,mean squared error over paired repeats/k/candidates per input; equal input weights; square root
+25,0.1573446507887002,4,4,16,16,0,A and B; every declared subset size and budget,mean squared error over paired repeats/k/candidates per input; equal input weights; square root
+100,0.07616410664011351,4,4,16,16,0,A and B; every declared subset size and budget,mean squared error over paired repeats/k/candidates per input; equal input weights; square root

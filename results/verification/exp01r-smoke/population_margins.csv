@@ -1,0 +1,5 @@
+input_id,source_test_row_id,population_margin_A_minus_B,population_judgment,practical_tie_tolerance,interpretation
+0,7930,0.10327065434298674,A_preferred,0.01,comparison of these two coordinate-shift controls; no assumed A>B ordering
+1,7803,-0.18794191649856148,B_preferred,0.01,comparison of these two coordinate-shift controls; no assumed A>B ordering
+2,2924,0.0673616686453378,A_preferred,0.01,comparison of these two coordinate-shift controls; no assumed A>B ordering
+3,2667,0.3030433541904049,A_preferred,0.01,comparison of these two coordinate-shift controls; no assumed A>B ordering

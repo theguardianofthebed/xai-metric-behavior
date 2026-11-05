@@ -42,6 +42,7 @@ This downloads hash-verified OpenXAI author CSVs, fits one model on training dat
 | Document | Purpose |
 |---|---|
 | [EXP-01](docs/EXP-01.md) | Seven compact sections: question, contract, design, latest smoke, limitations, implementation/run steps, and insight. |
+| [EXP-01-R](docs/EXP-01-R.md) | Adult dataset and prior XAI use, Captum/Quantus contract, direct RQ graphs, latest smoke and limits. |
 | [Framework](docs/FRAMEWORK.md) | Four research stages, evidence rules, and later experiments. |
 | [Quantus contract and checks](docs/QUANTUS_AUDIT.md) | Official-call settings, recorded traces, compatibility decisions, and the role of parity. |
 | [Current verification](results/verification/) | Fresh Quantus execution evidence; full development and confirmation remain unexecuted. |
@@ -51,7 +52,9 @@ The [live XAI Framework Atlas](https://timecapsule-traceability-atlas.iamlim0619
 
 ## Current evidence and boundaries
 
-**Latest Quantus smoke completed:** 576 FC attempts produced **559 finite returns (555 analysis-eligible, 4 warned near-constant)** and **17 undefined**, with **0 exceptions**. All 27 tests and 34 audit checks passed. The updated notebook passed all five code cells from a fresh Python 3.13.11 environment and reproduced key CLI outputs byte-for-byte. Missing-`ensurepip` creation/recovery checks also passed; hosted Colab/Jupyter UI remains unverified. [Setup verification](results/verification/colab_setup_validation_2026-11-05.json). [Results and limits](docs/EXP-01.md#4-latest-result--smoke)
+**EXP-01-R smoke:** 576 FC and 12 FE calls were eligible, with no undefined scores, near-constant warnings or exceptions. The first input's exhaustive population check agreed within **1.39e-16**; the matched A/B RMSE was **0.4751 / 0.1573 / 0.0762** at B=5/25/100. All 42 tests and all five notebook code cells passed; six key notebook outputs matched the canonical run. This notebook replay reused an existing environment/cache; hosted Colab remains unverified. [Results and graphs](docs/EXP-01-R.md#4-latest-result--smoke) · [Verification](results/verification/exp01r_validation.json).
+
+**EXP-01 synthetic smoke:** 576 FC attempts produced **559 finite returns (555 analysis-eligible, 4 warned near-constant)** and **17 undefined**, with **0 exceptions**. Its recorded 27 tests and 34 audit checks passed. After the reported Colab setup issue, the updated notebook passed all five code cells from a fresh Python 3.13.11 environment, with key outputs byte-identical. Missing-`ensurepip` creation/recovery checks also passed. [Setup verification](results/verification/colab_setup_validation_2026-11-05.json) · [Results and limits](docs/EXP-01.md#4-latest-result--smoke).
 
 The first attempt's near-constant case is preserved in the [failure report](docs/EXP-01.md#5-limitations--failure-report). Earlier [NumPy evidence](archive/exp01-numpy/) and the [Phase 1 scaffold](archive/README.md) remain historical. Full development and confirmation have not run.
 

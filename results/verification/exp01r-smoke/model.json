@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "contract": {
+    "dataset": "openxai_adult_author_snapshot",
+    "train_sha256": "15ffa1eaa8a075ace38f5ec5adcbe93220c7995cf4fe756e1079d80389c76f5a",
+    "n_training_records": 36177,
+    "partition_sha256": "86f3e510079d9d70671ebee8b14052f3e0f1712191db40a62d5f28eaf67178fb",
+    "features": [
+      "age",
+      "fnlwgt",
+      "education-num",
+      "capital-gain",
+      "capital-loss",
+      "hours-per-week",
+      "sex_Male",
+      "workclass_Private",
+      "marital-status_Non-Married",
+      "occupation_Other",
+      "relationship_Non-Husband",
+      "race_White",
+      "native-country_US"
+    ],
+    "preprocessing": "standard_scaler_train_only",
+    "model_parameters": {
+      "solver": "lbfgs",
+      "C": 1.0,
+      "l1_ratio": 0.0,
+      "max_iter": 2000,
+      "tol": 1e-08,
+      "fit_intercept": true,
+      "class_weight": null
+    },
+    "model_seed": 2026110502,
+    "packages": {
+      "numpy": "2.3.5",
+      "scipy": "1.17.0",
+      "scikit-learn": "1.9.1"
+    }
+  },
+  "contract_sha256": "9881fca36d232ec560744fff1db646c448c4fd1b7e23659fff41b302a2e4e3ed",
+  "scaler": {
+    "class": "sklearn.preprocessing.StandardScaler",
+    "with_mean": true,
+    "with_std": true,
+    "mean": [
+      38.5637559775548,
+      190033.8561516986,
+      10.118141360532935,
+      1079.8408381015563,
+      88.09367830389473,
+      40.983553086215,
+      0.6733007159244824,
+      0.7372363656466816,
+      0.5326865135306963,
+      0.5467285844597396,
+      0.587362136163861,
+      0.862177626668878,
+      0.912955745363076
+    ],
+    "scale": [
+      13.214987957020632,
+      105472.68874720481,
+      2.562047900462694,
+      7364.079885133598,
+      403.2349637738045,
+      12.021551918814579,
+      0.46900624927619444,
+      0.4401351006392497,
+      0.4989304478914628,
+      0.4978116505209871,
+      0.4923087010860699,
+      0.3447134559898383,
+      0.28189989778585667
+    ],
+    "var": [
+      174.63590670420035,
+      11124488071.564743,
+      6.5640894442652975,
+      54229672.55462926,
+      162598.43600966144,
+      144.51771053675446,
+      0.21996686186012382,
+      0.19371890681472245,
+      0.24893159183317565,
+      0.24781643939442935,
+      0.2423678571650533,
+      0.11882736674045821,
+      0.07946755237167644
+    ],
+    "n_samples_seen": 36177
+  },
+  "model": {
+    "class": "sklearn.linear_model.LogisticRegression",
+    "parameters": {
+      "solver": "lbfgs",
+      "C": 1.0,
+      "l1_ratio": 0.0,
+      "max_iter": 2000,
+      "tol": 1e-08,
+      "fit_intercept": true,
+      "class_weight": null
+    },
+    "random_state": 2026110502,
+    "classes": [
+      0,
+      1
+    ],
+    "weights": [
+      0.38900693164227973,
+      0.06573552612128081,
+      0.8629262538255156,
+      2.3174203369264013,
+      0.27367370680411374,
+      0.36640337125373523,
+      0.27998504491837667,
+      0.05767779007728771,
+      -1.4784172455018751,
+      -0.23435871170063113,
+      0.36604870450335936,
+      0.06830144298576254,
+      0.08358161057138382
+    ],
+    "bias": -1.740537138799545,
+    "target": "decision_function: log P(income=1)/P(income=0)",
+    "label_mapping": {
+      "0": "income <=50K",
+      "1": "income >50K"
+    }
+  },
+  "training": {
+    "warnings": [],
+    "n_iter": [
+      27
+    ],
+    "n_training_records": 36177,
+    "positive_class_orientation_checked": true,
+    "max_training_logit_adapter_error": 0.0,
+    "max_training_sigmoid_probability_error": 0.0,
+    "evaluation_records_used_for_fitting": 0
+  },
+  "model_sha256": "b6c305f62007032dab268809e8b9abc35ede696e668c9097d70b1049b8665e45"
+}

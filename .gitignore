@@ -4,5 +4,12 @@ __pycache__/
 .venv/
 .env
 .DS_Store
+*.egg-info/
+.ipynb_checkpoints/
 results/*/
-!results/README.md
+results/*.log
+!results/verification/
+!results/verification/**
+
+# Immutable downloaded datasets (hashes and provenance are committed separately).
+data/cache/

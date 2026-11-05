@@ -1,0 +1,163 @@
+{
+  "experiment_id": "EXP-01",
+  "stage": "implementation_verification_not_development_or_confirmation",
+  "status": "completed",
+  "created_at_utc": "2026-11-04T15:44:55.526331+00:00",
+  "canonical_smoke": {
+    "run_id": "0221db61739ed30a",
+    "path": "smoke/manifest.json",
+    "git": {
+      "commit": "ce08d3181f9325b82e91b9bb1b1585e10c787ab7",
+      "branch": "exp01-atlas-protocol",
+      "tracked_worktree_dirty": false
+    },
+    "metric_variant": "exp01-quantus-public-0.6.0-v1",
+    "implementation_sha256": "607491892e16bae9b6bb277c7e1b0ae683fef19933e01ef841d2af8d46d25ba1",
+    "backend_execution_sha256": "24b1a68fa955ca392d0678147348536e653b9347d2dfb7eae619c1146582f96b",
+    "atlas": {
+      "id": "3973d962-747e-45ef-b05c-18dd541358d9",
+      "source_revision": 9,
+      "snapshot_sha256": "72e708f0f5acd8139e6956432ec90b5b4e6daa31f8b2453439132ba67f042938"
+    },
+    "counts": {
+      "n_inputs": 4,
+      "repetitions_per_input": 4,
+      "n_planned_scores": 576,
+      "n_attempted_scores": 576,
+      "n_valid_scores": 559,
+      "n_nonfinite_scores": 17,
+      "n_official_finite_scores": 559,
+      "n_analysis_eligible_scores": 555,
+      "n_numerically_unstable_scores": 4,
+      "n_undefined_scores": 17,
+      "n_exception_scores": 0,
+      "n_exceptions": 0,
+      "n_failures_logged": 21,
+      "n_public_FC_calls": 576,
+      "n_public_FE_calls": 12,
+      "n_FE_official_finite": 12,
+      "n_FE_analysis_eligible": 12,
+      "n_FE_numerically_unstable": 0,
+      "n_FE_undefined": 0,
+      "n_trace_checks_passed": 588,
+      "n_pairing_checks_passed": 576,
+      "n_score_parity_passed": 584,
+      "n_score_parity_deferred_near_constant": 4,
+      "n_warning_records": 21
+    },
+    "validation": {
+      "enumeration_comparisons": 16,
+      "enumeration_all_passed": true,
+      "max_enumeration_absolute_error": 5.329070518200751e-15,
+      "max_singleton_FE_coordinate_error_eligible_inputs": 3.3306690738754696e-16,
+      "max_singleton_FE_coordinate_error_all_finite": 3.3306690738754696e-16,
+      "max_fixed_pair_margin_identity_error": 6.661338147750939e-16,
+      "numerical_tolerance": 1e-10,
+      "d20_enumeration_scope": "first input at configured subset sizes only",
+      "max_eligible_exact_anchor_error": 5.551115123125783e-16,
+      "max_public_trace_replay_absolute_error_all_diagnostics": 0.058028876269677176,
+      "max_stable_public_trace_replay_absolute_error": 1.1102230246251565e-15,
+      "actual_pairing_checks": 576,
+      "all_FC_calls_paired": true,
+      "public_FE_calls": 12,
+      "all_public_calls_trace_checked": true,
+      "all_public_calls_score_parity_classified": true
+    }
+  },
+  "implementation_tests": {
+    "path": "tests_summary.json",
+    "tests_run": 27,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "successful": true,
+    "implementation_unchanged_during_tests": true
+  },
+  "auxiliary_audit": {
+    "path": "quantus_audit.json",
+    "role": "auxiliary fixed-fixture/source verification; official Quantus is the primary experiment scorer",
+    "status": "passed",
+    "counts": {
+      "attempted": 34,
+      "passed": 34,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "notebook": {
+    "path": "notebook_validation.json",
+    "status": "passed",
+    "code_cells": 5,
+    "execution_mode": "unchanged_code_cells_in_shared_python_namespace",
+    "kernel_execution_verified": false,
+    "hosted_colab_ui_verified": false,
+    "setup_scope": "Actual setup cell executed using an existing checkout and existing isolated .venv; fresh Colab clone/download UI not exercised.",
+    "matches_canonical_cli_bytes": {
+      "scores.csv": true,
+      "population_scores.csv": true,
+      "metric_calls.jsonl": true
+    },
+    "verification_replay_not_separate_research_result": true
+  },
+  "first_incomplete_quantus_attempt": {
+    "path": "../../archive/exp01-quantus-first-attempt/smoke/manifest.json",
+    "run_id": "c04f6216078e169e",
+    "source_commit": "02cd3d2e93a9142b8ce3cbd8d1d36640dd8ab031",
+    "status": "failed_at_strict_numerical_parity_guard",
+    "preserved_unchanged": true,
+    "handling": "NearConstantInputWarning prompted an explicit analysis-eligibility rule before this rerun. Same configuration and seeds; original scores, samples and tolerance retained."
+  },
+  "interpretation": [
+    "Official Quantus public calls supply every reported FC/FE score; NumPy supplies references and auxiliary trace checks only.",
+    "576 FC attempts = 559 official finite + 17 undefined; 559 finite = 555 analysis eligible + 4 near-constant warnings; zero exceptions.",
+    "All 588 public FC/FE calls passed structural trace checks. 584 score-parity/status checks passed (including consistent undefined status); 4 were explicitly deferred for near-constant inputs.",
+    "Largest stable numerical replay discrepancy is 1.11e-15; the 0.0580 near-constant diagnostic discrepancy remains visible rather than being counted as a parity pass.",
+    "Enumeration covers the teaching fixture and first d20 input at configured subset sizes, not every input.",
+    "Numerical eligibility handling was refined during smoke debugging, not frozen prospective confirmation.",
+    "Plots and conditional summaries retain all-attempt exclusion denominators; four synthetic inputs do not establish general rates or real-data transfer."
+  ],
+  "not_executed": [
+    "full_development",
+    "reserved_confirmation",
+    "EXP-01-R_data_processing_training_or_implementation",
+    "hosted_Colab_UI"
+  ],
+  "artifact_sha256": {
+    "notebook_validation.json": "1ca9b8a25535a94b26b64f49b41bc76b0a708c654f1e1fa791abb6b2d4340a6b",
+    "quantus_audit.json": "63865a79466388cf26a3e981594de3a27d568c7b44bb5b6db7a1f9c7e114f4b3",
+    "smoke/contrast_records.csv": "d068f5224b59bfba9e225d1b907ae4f7f4a66f3147a709477734e87db4d93ab0",
+    "smoke/contrast_summary.csv": "83859f9b5699fb9464fc7d8d7874426eab6f3e35c6c9b074c0dd86617177c7a4",
+    "smoke/exact_enumeration.csv": "9e33afcf4153d9e9885ff0795cd303d957891328dfc5bceb68219d84ef7eb61e",
+    "smoke/failures.csv": "0048fb1133ad91d123abf54596286d43416a8714b567d6a28b04d2d194463b45",
+    "smoke/figures/analysis_ineligible_fraction.png": "ba830794928647fba2e152b64ce7ec79e0e43dd7194209138f2eec4548dc8936",
+    "smoke/figures/estimator_error_vs_budget.png": "a7c275786d1e0356652b99f3fccb4b56216fdf7ac891b7bcd0cd00d5bfaadb40",
+    "smoke/figures/population_vs_subset_size.png": "ea903b1459ead16784421005b79b5633c9c00f1ce612266b71a0acb5736c3b22",
+    "smoke/input_summary.csv": "700c7b28e5df7165c0457809bcfb4d031b038cab9efcad620719847231e78d09",
+    "smoke/inputs.npz": "28d6219ccd7534d8910424862f03f2cd3334300e948928f8a92442e36d9fd2df",
+    "smoke/manifest.json": "9ecda160f4a89934b590b992b3b6f182d8e4c1ed9f2b473533a32447b0450156",
+    "smoke/metric_calls.jsonl": "2cf125e9ed32a2c7521e362a9b935ce6b99e466685cc5713d4d3db17fea2b70b",
+    "smoke/pairwise_margins.csv": "c7107bdb0d90b17a305cadc5ce41318d77e2cc03ab0516db202bcb6a925dd669",
+    "smoke/population_scores.csv": "e593fed46b3a68b51ca7f0188ab50fafd89c90f60bba14f0229dc701af1fda09",
+    "smoke/resolved_config.yaml": "4b13aa457e608f92182682755148203d6e640787330efd7625ad7d04261fe3fa",
+    "smoke/score_summary.csv": "10e82bffc1657aef923149de707737ee92bfa13031036e8bb64b35a4a1a2b0fc",
+    "smoke/scores.csv": "fe27904200c1b8520adb2e74929284cb2583a1cd5f00bc7db3b04e4dcc60d3af",
+    "smoke/traces/FE_input_0000_A.npz": "85f644506c1787966c60e9c6adb3a347d6e46dfd8b27357724ff42ce839b0830",
+    "smoke/traces/FE_input_0000_B.npz": "86e1d9e94489ad262b80b2276fbe9f2d558ad514aa942f2dc221fcad4c786ece",
+    "smoke/traces/FE_input_0000_exact.npz": "c8e6d0a78db8a49c2f67e4b0c57afe01acc84923a978b8d9c390eca986a35ddb",
+    "smoke/traces/FE_input_0001_A.npz": "e80bb0aa799a6e14788fe87d4f5cdf0c0dfae033bc1377c1277dd1bc2b3fa072",
+    "smoke/traces/FE_input_0001_B.npz": "751cee2e1ff00c422a75361ed01ecde96a27fc2e5906ebfb4399bfbcf008b6f4",
+    "smoke/traces/FE_input_0001_exact.npz": "de40bd1cba2f96e65f7b2d1100d58453762cf18bacb024e571dc411723a207d3",
+    "smoke/traces/FE_input_0002_A.npz": "c98a3243cc06b23922c6dbf330342729da0ee7777ffeccb8918d091ad46aa755",
+    "smoke/traces/FE_input_0002_B.npz": "18b5a3d388f0aa65fd4a0c75b1d64252262d134ce10e4ce33644ce8738df18cb",
+    "smoke/traces/FE_input_0002_exact.npz": "6a317f3369ccfd848b089e3e92fad3f1a9469608fb146fc7ae201f6f58049507",
+    "smoke/traces/FE_input_0003_A.npz": "514e880404c23c55214d4c23847b7897558cbc3e0b07de5de13f0303380f7cf7",
+    "smoke/traces/FE_input_0003_B.npz": "a021ffe5cddd9915db97f36e8bbd3df4554fb436745f53fab65b696358c89638",
+    "smoke/traces/FE_input_0003_exact.npz": "b8456978cf9c5f4c2c2ac2d085dcc4569aeeaeb8e41243759d8b59fdd8854bad",
+    "smoke/traces/input_0000.npz": "6117d6703c825ed87d078451070404a4d96aba806d878fcc920b862194b41fee",
+    "smoke/traces/input_0001.npz": "7c80d0ebc30280836c6d72a7b77bbd880ab121683bc3be2ea85fe9072d3546e8",
+    "smoke/traces/input_0002.npz": "165635febb3c2d36751ab01c420dd931f2c59c25746f1974ac3e109ea2912d25",
+    "smoke/traces/input_0003.npz": "d023a3de68a8a3dd5ff06df5e28940fa011efb49c91d937a39c7ce3a7140be7b",
+    "tests.txt": "785f249c332f1f2d65e1dd62c7d675d2fbef2e65f99aa4e2c42e2e8e100aa037",
+    "tests_summary.json": "50bcc4b5eda91fbeee6719b26c2246feca9a570fed613667486db3a1995f398f"
+  }
+}

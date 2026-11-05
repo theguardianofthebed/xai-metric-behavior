@@ -1,0 +1,43 @@
+{
+  "notebook": "notebooks/EXP-01.ipynb",
+  "schema_valid": true,
+  "cells": 13,
+  "code_cells": 5,
+  "executed_code_cell_indices": [
+    2,
+    4,
+    6,
+    8,
+    10
+  ],
+  "code_cells_passed": true,
+  "method": "Actual unmodified notebook code cells executed in order in one shared Python namespace; not a Jupyter kernel/UI execution.",
+  "errors_during_cell_execution": [],
+  "kernel_verification": "BLOCKED: this environment denies socket binding for both TCP and local IPC (Operation not permitted); Jupyter/Colab UI unverified.",
+  "smoke_run_path": "results/exp01-smoke-20261104T035446_049622Z",
+  "smoke_run_id": "0675ed410509c102",
+  "source_commit": "61ffdcff3f33732681d367724689e572f748a007",
+  "implementation_sha256": "74d9ec81efcc5b930ad84ea3274d7d3cb43e4716810e42242e785619d1ff7cf3",
+  "counts": {
+    "n_inputs": 4,
+    "repetitions_per_input": 4,
+    "n_planned_scores": 576,
+    "n_attempted_scores": 576,
+    "n_valid_scores": 547,
+    "n_nonfinite_scores": 29,
+    "n_exception_scores": 0,
+    "n_exceptions": 0,
+    "n_failures_logged": 29
+  },
+  "validation": {
+    "enumeration_comparisons": 16,
+    "enumeration_all_passed": true,
+    "max_enumeration_absolute_error": 5.329070518200751e-15,
+    "max_singleton_FE_coordinate_error_all_inputs": 1.1102230246251565e-16,
+    "max_fixed_pair_margin_identity_error": 6.661338147750939e-16,
+    "numerical_tolerance": 1e-10,
+    "d20_enumeration_scope": "first input at configured subset sizes only",
+    "max_defined_exact_anchor_error": 7.771561172376096e-16
+  },
+  "cli_scores_identical": true
+}

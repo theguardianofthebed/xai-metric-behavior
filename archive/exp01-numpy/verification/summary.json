@@ -1,0 +1,79 @@
+{
+  "evidence_type": "implementation_verification_not_development_or_confirmation",
+  "date": "2026-11-04",
+  "source_commit": "61ffdcff3f33732681d367724689e572f748a007",
+  "implementation_sha256": "74d9ec81efcc5b930ad84ea3274d7d3cb43e4716810e42242e785619d1ff7cf3",
+  "tests": {
+    "passed": 18,
+    "failed": 0,
+    "skipped": 0,
+    "log": "tests.txt"
+  },
+  "quantus_audit": {
+    "passed": 34,
+    "failed": 0,
+    "skipped": 0,
+    "report": "quantus_audit.json",
+    "max_score_absolute_error": 4.440892098500626e-16
+  },
+  "smoke": {
+    "path": "smoke",
+    "run_id": "46a02f55ce1739c6",
+    "counts": {
+      "n_inputs": 4,
+      "repetitions_per_input": 4,
+      "n_planned_scores": 576,
+      "n_attempted_scores": 576,
+      "n_valid_scores": 547,
+      "n_nonfinite_scores": 29,
+      "n_exception_scores": 0,
+      "n_exceptions": 0,
+      "n_failures_logged": 29
+    },
+    "validation": {
+      "enumeration_comparisons": 16,
+      "enumeration_all_passed": true,
+      "max_enumeration_absolute_error": 5.329070518200751e-15,
+      "max_singleton_FE_coordinate_error_all_inputs": 1.1102230246251565e-16,
+      "max_fixed_pair_margin_identity_error": 6.661338147750939e-16,
+      "numerical_tolerance": 1e-10,
+      "d20_enumeration_scope": "first input at configured subset sizes only",
+      "max_defined_exact_anchor_error": 7.771561172376096e-16
+    }
+  },
+  "notebook": {
+    "report": "notebook_validation.json",
+    "schema_valid": true,
+    "unmodified_code_cells_passed": 5,
+    "cli_scores_identical": true,
+    "kernel_or_colab_ui": "not_verified_socket_binding_denied"
+  },
+  "unexecuted": [
+    "full development configuration",
+    "reserved d20 confirmation conditions"
+  ],
+  "resolved_implementation_failures": [
+    "Draft development/confirmation weights had 22/21 entries instead of 20; strict configuration validation rejected them, then both vectors were corrected and tests passed."
+  ],
+  "retained_failures": [
+    "29 undefined Pearson outcomes in smoke retained with reason and denominator; no score-zero replacement.",
+    "Pinned Quantus 0.6.0 unmodified (N,d) FC validation error reproduced; (N,1,d) public-call parity verified without patching.",
+    "Jupyter kernel TCP and IPC socket binding denied by execution environment; actual code cells validated sequentially in ordinary Python, UI remains unverified."
+  ],
+  "publication": {
+    "status": "pull_request_open",
+    "target_branch": "exp01-atlas-protocol",
+    "initial_setup_incident": {
+      "status": "resolved",
+      "reason": "Initial Git push authentication was unavailable; connected GitHub create_tree returned HTTP 403 Resource not accessible by integration.",
+      "resolution": "The user granted repository access. The connected installation now lists xai-metric-behavior with push permission."
+    },
+    "source_commit_scope": "source_commit records the local verification checkout; published_source_commit identifies the identical source tree on GitHub",
+    "remote_branch_created": true,
+    "pull_request_created": true,
+    "pull_request_url": "https://github.com/theguardianofthebed/xai-metric-behavior/pull/1",
+    "verification_commit": "585cca76356bcd71e3fddb5e7178f2a0ca4f0494"
+  },
+  "published_source_commit": "808bbdd5c55a89b38ee60b0cc447262f67535c19",
+  "source_tree": "646df28ef4597a57e137e97a77505793478f486e"
+}

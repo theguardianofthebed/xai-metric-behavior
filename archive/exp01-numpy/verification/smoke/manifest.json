@@ -1,0 +1,119 @@
+{
+  "experiment_id": "EXP-01",
+  "phase": "smoke",
+  "status": "completed",
+  "run_id": "46a02f55ce1739c6",
+  "started_at_utc": "2026-11-04T03:53:31.169663+00:00",
+  "config_sha256": "fdf7a41eafb8936e91216f55b28e39a96dd3d29af5d8e2c4dab5a032b05a4319",
+  "implementation_sha256": "74d9ec81efcc5b930ad84ea3274d7d3cb43e4716810e42242e785619d1ff7cf3",
+  "git": {
+    "commit": "61ffdcff3f33732681d367724689e572f748a007",
+    "branch": "exp01-atlas-protocol",
+    "tracked_worktree_dirty": false
+  },
+  "runtime": {
+    "python": "3.12.14",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.39",
+    "packages": {
+      "numpy": "2.3.5",
+      "scipy": "1.17.0",
+      "PyYAML": "6.0.3",
+      "matplotlib": "3.10.8",
+      "quantus": "0.6.0",
+      "torch": "2.10.0+cpu"
+    }
+  },
+  "metric_variant": "exp01-numpy-pearson-v1",
+  "library_execution": "Transparent NumPy evaluator; Quantus execution is a separate optional audit.",
+  "atlas": {
+    "id": "3973d962-747e-45ef-b05c-18dd541358d9",
+    "source_revision": 4,
+    "snapshot_sha256": "8bcfe78a8adbc6ba7e565dd41b6938b7455092e4922fca5397cf8d5c068710b5"
+  },
+  "rng": {
+    "generator": "PCG64",
+    "seed_roots": {
+      "inputs": 2026110401,
+      "evaluator": 2026110402,
+      "analysis": 2026110403
+    },
+    "evaluator_seed_sequence": "[evaluator_seed, phase_id, input_id, repetition]",
+    "phase_id": 0,
+    "coupling": "independent permutation per draw; prefixes share k and budgets; same plan across explanations"
+  },
+  "contract": {
+    "target": "scalar g(x)=sum_j w_j*x_j; no softmax/class selection",
+    "baseline": 0.0,
+    "signed": true,
+    "abs": false,
+    "normalise": false,
+    "selection": "uniform size-k without replacement within draw; independent draws",
+    "comparator": "Pearson",
+    "direction": "higher",
+    "aggregation": "equal-weight inputs after within-input repetitions",
+    "undefined": "retained as NaN with reasons; contrasts condition on joint validity",
+    "pair_A_swaps": [
+      [
+        0,
+        5
+      ]
+    ],
+    "pair_B_swaps": [
+      [
+        0,
+        5
+      ],
+      [
+        1,
+        6
+      ]
+    ],
+    "indexing": "zero_based"
+  },
+  "confirmation_freeze": null,
+  "counts": {
+    "n_inputs": 4,
+    "repetitions_per_input": 4,
+    "n_planned_scores": 576,
+    "n_attempted_scores": 576,
+    "n_valid_scores": 547,
+    "n_nonfinite_scores": 29,
+    "n_exception_scores": 0,
+    "n_exceptions": 0,
+    "n_failures_logged": 29
+  },
+  "interpretation": "Population theorem under declared premises; finite estimates and illustrative budget choices do not establish universal metric reliability.",
+  "validation": {
+    "enumeration_comparisons": 16,
+    "enumeration_all_passed": true,
+    "max_enumeration_absolute_error": 5.329070518200751e-15,
+    "max_singleton_FE_coordinate_error_all_inputs": 1.1102230246251565e-16,
+    "max_fixed_pair_margin_identity_error": 6.661338147750939e-16,
+    "numerical_tolerance": 1e-10,
+    "d20_enumeration_scope": "first input at configured subset sizes only",
+    "max_defined_exact_anchor_error": 7.771561172376096e-16
+  },
+  "evidence_scope": "Implementation/sanity evidence only; smoke is not full development or confirmation.",
+  "finished_at_utc": "2026-11-04T03:53:32.668335+00:00",
+  "elapsed_seconds": 1.4986761169966485,
+  "artifacts_sha256": {
+    "contrast_records.csv": "1beeb476cb1add0b67b03eac495100a45954eeafd35531fa73be28766b982070",
+    "contrast_summary.csv": "2f2f10877b91b5cedbb2e3aeb0e610ffd3287dcf7e9394df33ac3acfbdbb5177",
+    "exact_enumeration.csv": "b04d3f0a46a0a3c705479e09c588ee6858c8150a6b077b747dcc1772a9d2e1c6",
+    "failures.csv": "5a1500b7753b4575531bfc433b73227752e27bd78ce09e4372758ba903e8201b",
+    "figures/estimator_error_vs_budget.png": "3b504f1ef01cfe7f3752cf2e109976f005691a1027786d1a25ff2e593dacc785",
+    "figures/population_vs_subset_size.png": "ea903b1459ead16784421005b79b5633c9c00f1ce612266b71a0acb5736c3b22",
+    "figures/undefined_fraction.png": "f9a1607673c8fe48ef85b9c898644da88ecf478550fb8f8f79d395183f3e4c87",
+    "input_summary.csv": "cff80ed7ad7ac6a252a2ac835ec80fb166f58bc148b16130f6f6520ee7f250bc",
+    "inputs.npz": "28d6219ccd7534d8910424862f03f2cd3334300e948928f8a92442e36d9fd2df",
+    "pairwise_margins.csv": "02edd68844e0e9872951804143c637aa34819cc6a81f0902f08b886531f59abb",
+    "population_scores.csv": "6147fadc05ee10aa21879f7567728ab5a2fdcc90115547e73ac12d8fafcba2b2",
+    "resolved_config.yaml": "4b13aa457e608f92182682755148203d6e640787330efd7625ad7d04261fe3fa",
+    "score_summary.csv": "67a2a7c8298b56ffbc165b51f399aa8b4d4f167e9c660801d31d6fd1083134fd",
+    "scores.csv": "1373d4ceab4fdeafa9b3ed797589ac68c0fd65ba7671365cd857ef5097eca429",
+    "traces/input_0000.npz": "85875245f1fae3c149f462aecc715f705562b8970adc06aa3f05dc00ffa2069d",
+    "traces/input_0001.npz": "102d8220ec9169df32617f4882249e3beb09f4100ae84262290de9252d936287",
+    "traces/input_0002.npz": "497767095f0e369da6c132fd94da4c40265bdeb3fc59ee957cd066a6c50c8454",
+    "traces/input_0003.npz": "a0034d5be3db75f62e2667596178b775bfebd56b00efbc58ba4cb3f92ebc062b"
+  }
+}

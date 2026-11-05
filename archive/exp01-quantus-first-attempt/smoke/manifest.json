@@ -1,0 +1,175 @@
+{
+  "experiment_id": "EXP-01",
+  "phase": "smoke",
+  "status": "failed",
+  "run_id": "c04f6216078e169e",
+  "started_at_utc": "2026-11-04T15:24:06.425094+00:00",
+  "config_sha256": "fdf7a41eafb8936e91216f55b28e39a96dd3d29af5d8e2c4dab5a032b05a4319",
+  "implementation_sha256": "9a1dbc27d1b096399c22ba7e7a186568e58261c03fc78cd17379479149ac2aa6",
+  "git": {
+    "commit": "02cd3d2e93a9142b8ce3cbd8d1d36640dd8ab031",
+    "branch": "exp01-atlas-protocol",
+    "tracked_worktree_dirty": false
+  },
+  "runtime": {
+    "python": "3.12.14",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.39",
+    "packages": {
+      "numpy": "2.3.5",
+      "scipy": "1.17.0",
+      "PyYAML": "6.0.3",
+      "matplotlib": "3.10.8",
+      "quantus": "0.6.0",
+      "torch": "2.10.0+cpu"
+    }
+  },
+  "metric_variant": "exp01-quantus-public-0.6.0-v1",
+  "library_execution": "Official Quantus 0.6.0 public FC/FE returns; NumPy is reference/trace verification only.",
+  "backend_execution_sha256": "24b1a68fa955ca392d0678147348536e653b9347d2dfb7eae619c1146582f96b",
+  "quantus_backend": {
+    "metric_variant": "exp01-quantus-public-0.6.0-v1",
+    "versions": {
+      "quantus": "0.6.0",
+      "torch": "2.10.0+cpu",
+      "numpy": "2.3.5",
+      "scipy": "1.17.0"
+    },
+    "source_sha256": {
+      "metrics/faithfulness/faithfulness_correlation.py": "77e63fe039d42aba7ed24dabb45366c2b89170745465b2764eb7b5b55889e0e8",
+      "metrics/faithfulness/faithfulness_estimate.py": "d06817f38b3e87565887469b02e78be1fe12400f7d46f9594c00937a6f670a41",
+      "functions/perturb_func.py": "cd119bf6f8e087001fba664bd2280f7055a8274941da950b1a06f1757de2a6e5",
+      "functions/similarity_func.py": "f912be3da66766dcfb5e24d8c1f736e50dca71e34f54ae285a8b6e91c0034179",
+      "metrics/base.py": "6a318f9b83a1c5c670c1853679a9d745538ae8ef6e94fcbf35c383d7a67266f5",
+      "helpers/asserts.py": "07ac6b2e3442ba776eb750873cdc15120620c15970296abc00a849382e4edb4a",
+      "helpers/utils.py": "795878b6b082ded9c9b56a68ba47b68a12b61a619b3dd45778a38483922a8500",
+      "helpers/model/pytorch_model.py": "2f9a8e6295f974c9a50b23ad1c651988032f9b597624ce4ce9ebfdd9a1d070e5"
+    },
+    "execution_sha256": "24b1a68fa955ca392d0678147348536e653b9347d2dfb7eae619c1146582f96b",
+    "upstream_commit": "85bcf2c8e88f7b8f3334f552ee72f8a37e870e1a",
+    "verified_git_blobs": {
+      "metrics/faithfulness/faithfulness_correlation.py": "fe38df61fe0f09a94bb33b91b3cb772c0d97689f",
+      "metrics/faithfulness/faithfulness_estimate.py": "4cdf7aa209e34ee97b702927b3527194f2599c4f",
+      "functions/perturb_func.py": "15d1c07746bef0d6e20da64218422224feeafb2f",
+      "functions/similarity_func.py": "e408818c523107047cfd60c79cb7f3bd4e4a6e5a",
+      "metrics/base.py": "521592ce2e06ed3b6a441f2fdcd5bf8e1ec2c0ec",
+      "helpers/asserts.py": "401f5f568cf136814b2ddec6a58e0b26d79e2d82",
+      "helpers/utils.py": "3f072e30c2e99e0352f9f969a9ce1ec98d058b67",
+      "helpers/model/pytorch_model.py": "5c61a8335a67d617c1790e932f0a5455e0129143"
+    },
+    "public_api": [
+      "quantus.FaithfulnessCorrelation.__call__",
+      "quantus.FaithfulnessEstimate.__call__"
+    ],
+    "perturb_func": "quantus.functions.perturb_func.batch_baseline_replacement_by_indices",
+    "similarity_func": "quantus.functions.similarity_func.correlation_pearson",
+    "precision": "CPU float64; scoped torch.set_default_dtype(torch.float64); original dtype restored in finally",
+    "rng": "Scoped legacy NumPy MT19937; original state restored in finally; serialized by a process-local RLock",
+    "thread_contract": "Run this experiment serially; unrelated threads must not mutate NumPy global RNG or Torch default dtype.",
+    "score_source": "Actual public metric(...) return, never replaced by a reference calculation"
+  },
+  "atlas": {
+    "id": "3973d962-747e-45ef-b05c-18dd541358d9",
+    "source_revision": 8,
+    "snapshot_sha256": "70951b5340395764cec2eac2874a75f5e6ddb5ffc950739ffb3718ccdd287291"
+  },
+  "rng": {
+    "input_generator": "PCG64",
+    "evaluator_generator": "Quantus native NumPy legacy MT19937",
+    "seed_roots": {
+      "inputs": 2026110401,
+      "evaluator": 2026110402,
+      "analysis": 2026110403
+    },
+    "evaluator_seed_sequence": "SeedSequence([evaluator_seed, phase_id, input_id, repetition]).generate_state(4, uint32)",
+    "phase_id": 0,
+    "coupling": "Reset identical legacy state per condition/candidate; verify actual native k/budget/explanation prefixes",
+    "global_state": "Serial scoped calls restore NumPy state and Torch default dtype"
+  },
+  "contract": {
+    "target": "scalar g(x)=sum_j w_j*x_j; no softmax/class selection",
+    "baseline": 0.0,
+    "signed": true,
+    "abs": false,
+    "normalise": false,
+    "selection": "uniform size-k without replacement within draw; independent draws",
+    "comparator": "Pearson",
+    "direction": "higher",
+    "aggregation": "equal-weight inputs after within-input repetitions",
+    "undefined": "retained as NaN with reasons; contrasts condition on joint validity",
+    "pair_A_swaps": [
+      [
+        0,
+        5
+      ]
+    ],
+    "pair_B_swaps": [
+      [
+        0,
+        5
+      ],
+      [
+        1,
+        6
+      ]
+    ],
+    "indexing": "zero_based"
+  },
+  "confirmation_freeze": null,
+  "counts": {
+    "n_inputs": 4,
+    "repetitions_per_input": 4,
+    "n_planned_scores": 576,
+    "n_attempted_scores": 332,
+    "n_valid_scores": 321,
+    "n_nonfinite_scores": 10,
+    "n_exception_scores": 1,
+    "n_exceptions": 1,
+    "n_failures_logged": 12,
+    "n_public_FC_calls": 332,
+    "n_public_FE_calls": 12,
+    "n_trace_checks_passed": 343,
+    "n_pairing_checks_passed": 331,
+    "n_warning_records": 13
+  },
+  "interpretation": "Population theorem under declared premises; finite estimates and illustrative budget choices do not establish universal metric reliability.",
+  "validation": {
+    "enumeration_comparisons": 16,
+    "enumeration_all_passed": true,
+    "max_enumeration_absolute_error": 5.329070518200751e-15,
+    "max_singleton_FE_coordinate_error_all_inputs": 3.3306690738754696e-16,
+    "max_fixed_pair_margin_identity_error": 6.661338147750939e-16,
+    "numerical_tolerance": 1e-10,
+    "d20_enumeration_scope": "first input at configured subset sizes only"
+  },
+  "error": {
+    "type": "RuntimeError",
+    "message": "Quantus FC/adapter failed; official return retained: RuntimeError: public score disagrees with independent trace replay"
+  },
+  "finished_at_utc": "2026-11-04T15:24:09.158036+00:00",
+  "elapsed_seconds": 2.733026132991654,
+  "artifacts_sha256": {
+    "exact_enumeration.csv": "9e33afcf4153d9e9885ff0795cd303d957891328dfc5bceb68219d84ef7eb61e",
+    "failures.csv": "3a33952c90f32ab009d030744ca0a81cf34aa2c4f99a43366f6303fb8486f3da",
+    "inputs.npz": "28d6219ccd7534d8910424862f03f2cd3334300e948928f8a92442e36d9fd2df",
+    "metric_calls.jsonl": "19d46c1e2dabadb6d68a9e9ad4602a18dcf54fffab249e15bc5b88719e613b99",
+    "population_scores.csv": "b8d061fce0c42cb29f3329f1d518e2110d7df6016d09e18535110659e22adda6",
+    "resolved_config.yaml": "4b13aa457e608f92182682755148203d6e640787330efd7625ad7d04261fe3fa",
+    "scores.csv": "85888521378232f7d448f8fb100697dc82282da926c153a854b17cb86165e270",
+    "traces/FE_input_0000_A.npz": "85f644506c1787966c60e9c6adb3a347d6e46dfd8b27357724ff42ce839b0830",
+    "traces/FE_input_0000_B.npz": "86e1d9e94489ad262b80b2276fbe9f2d558ad514aa942f2dc221fcad4c786ece",
+    "traces/FE_input_0000_exact.npz": "c8e6d0a78db8a49c2f67e4b0c57afe01acc84923a978b8d9c390eca986a35ddb",
+    "traces/FE_input_0001_A.npz": "e80bb0aa799a6e14788fe87d4f5cdf0c0dfae033bc1377c1277dd1bc2b3fa072",
+    "traces/FE_input_0001_B.npz": "751cee2e1ff00c422a75361ed01ecde96a27fc2e5906ebfb4399bfbcf008b6f4",
+    "traces/FE_input_0001_exact.npz": "de40bd1cba2f96e65f7b2d1100d58453762cf18bacb024e571dc411723a207d3",
+    "traces/FE_input_0002_A.npz": "c98a3243cc06b23922c6dbf330342729da0ee7777ffeccb8918d091ad46aa755",
+    "traces/FE_input_0002_B.npz": "18b5a3d388f0aa65fd4a0c75b1d64252262d134ce10e4ce33644ce8738df18cb",
+    "traces/FE_input_0002_exact.npz": "6a317f3369ccfd848b089e3e92fad3f1a9469608fb146fc7ae201f6f58049507",
+    "traces/FE_input_0003_A.npz": "514e880404c23c55214d4c23847b7897558cbc3e0b07de5de13f0303380f7cf7",
+    "traces/FE_input_0003_B.npz": "a021ffe5cddd9915db97f36e8bbd3df4554fb436745f53fab65b696358c89638",
+    "traces/FE_input_0003_exact.npz": "b8456978cf9c5f4c2c2ac2d085dcc4569aeeaeb8e41243759d8b59fdd8854bad",
+    "traces/failed_call_0000344.npz": "e1c9aaf15c71439f14a1164f54d57d217618828d732f3704f2695fc2c204f99b",
+    "traces/input_0000.npz": "6117d6703c825ed87d078451070404a4d96aba806d878fcc920b862194b41fee",
+    "traces/input_0001.npz": "7c80d0ebc30280836c6d72a7b77bbd880ab121683bc3be2ea85fe9072d3546e8",
+    "traces/input_0002.npz": "644e7e2ac62220ad2c14c69466645487e029dd44aecdef59673623f6d6250717"
+  }
+}

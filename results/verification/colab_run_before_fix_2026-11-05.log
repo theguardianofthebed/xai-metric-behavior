@@ -1,0 +1,32 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/scratch/c37576c9942b/xai-metric-behavior/src/xai_metric_behavior/__main__.py", line 7, in <module>
+    from .experiment import freeze_confirmation, run_experiment
+  File "/workspace/scratch/c37576c9942b/xai-metric-behavior/src/xai_metric_behavior/experiment.py", line 21, in <module>
+    from .quantus_backend import (METRIC_VARIANT, PublicScore, backend_provenance,
+                                 evaluator_seed_words, public_score, verify_pairing)
+  File "/workspace/scratch/c37576c9942b/xai-metric-behavior/src/xai_metric_behavior/quantus_backend.py", line 20, in <module>
+    import quantus
+  File "/workspace/scratch/c37576c9942b/xai-metric-behavior/.venv313/lib/python3.13/site-packages/quantus/__init__.py", line 11, in <module>
+    from quantus.evaluation import evaluate
+  File "/workspace/scratch/c37576c9942b/xai-metric-behavior/.venv313/lib/python3.13/site-packages/quantus/evaluation.py", line 19, in <module>
+    from quantus.functions.explanation_func import explain
+  File "/workspace/scratch/c37576c9942b/xai-metric-behavior/.venv313/lib/python3.13/site-packages/quantus/functions/explanation_func.py", line 17, in <module>
+    from quantus.helpers import constants
+  File "/workspace/scratch/c37576c9942b/xai-metric-behavior/.venv313/lib/python3.13/site-packages/quantus/helpers/constants.py", line 17, in <module>
+    from quantus.metrics import *
+  File "/workspace/scratch/c37576c9942b/xai-metric-behavior/.venv313/lib/python3.13/site-packages/quantus/metrics/__init__.py", line 7, in <module>
+    from quantus.metrics.axiomatic import *
+  File "/workspace/scratch/c37576c9942b/xai-metric-behavior/.venv313/lib/python3.13/site-packages/quantus/metrics/axiomatic/__init__.py", line 7, in <module>
+    from quantus.metrics.axiomatic.completeness import Completeness
+  File "/workspace/scratch/c37576c9942b/xai-metric-behavior/.venv313/lib/python3.13/site-packages/quantus/metrics/axiomatic/completeness.py", line 24, in <module>
+    from quantus.metrics.base import Metric
+  File "/workspace/scratch/c37576c9942b/xai-metric-behavior/.venv313/lib/python3.13/site-packages/quantus/metrics/base.py", line 31, in <module>
+    import matplotlib.pyplot as plt
+  File "/workspace/scratch/c37576c9942b/xai-metric-behavior/.venv313/lib/python3.13/site-packages/matplotlib/__init__.py", line 1299, in <module>
+    rcParams['backend'] = os.environ.get('MPLBACKEND')
+    ~~~~~~~~^^^^^^^^^^^
+  File "/workspace/scratch/c37576c9942b/xai-metric-behavior/.venv313/lib/python3.13/site-packages/matplotlib/__init__.py", line 774, in __setitem__
+    raise ValueError(f"Key {key}: {ve}") from None
+ValueError: Key backend: 'module://matplotlib_inline.backend_inline' is not a valid value for backend; supported values are ['gtk3agg', 'gtk3cairo', 'gtk4agg', 'gtk4cairo', 'macosx', 'nbagg', 'notebook', 'qtagg', 'qtcairo', 'qt5agg', 'qt5cairo', 'tkagg', 'tkcairo', 'webagg', 'wx', 'wxagg', 'wxcairo', 'agg', 'cairo', 'pdf', 'pgf', 'ps', 'svg', 'template']

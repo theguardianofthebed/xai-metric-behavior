@@ -1,0 +1,84 @@
+{
+  "started_at_utc": "2026-11-04T15:42:55.862864+00:00",
+  "notebook_sha256": "14f698ffdf419ac263083ea428f2848db535f077865b0586f839d76da4ffbf6c",
+  "schema_valid": true,
+  "code_cells": 5,
+  "hosted_colab_ui_verified": false,
+  "setup_scope": "Actual setup cell executed using an existing checkout and existing isolated .venv; fresh Colab clone/download UI not exercised.",
+  "kernel_error": {
+    "type": "RuntimeError",
+    "message": "Kernel died before replying to kernel_info"
+  },
+  "kernel_execution_verified": false,
+  "execution_mode": "unchanged_code_cells_in_shared_python_namespace",
+  "cells": [
+    {
+      "cell_index": 2,
+      "status": "passed",
+      "elapsed_seconds": 31.76418814000499
+    },
+    {
+      "cell_index": 4,
+      "status": "passed",
+      "elapsed_seconds": 0.0001777620054781437
+    },
+    {
+      "cell_index": 6,
+      "status": "passed",
+      "elapsed_seconds": 9.969859456003178
+    },
+    {
+      "cell_index": 8,
+      "status": "passed",
+      "elapsed_seconds": 0.004872503996011801
+    },
+    {
+      "cell_index": 10,
+      "status": "passed",
+      "elapsed_seconds": 0.04114039499836508
+    }
+  ],
+  "status": "passed",
+  "elapsed_seconds": 43.83561056500184,
+  "output_directory": "/workspace/scratch/aa90ee89683c/xai-metric-behavior/results/exp01-smoke-20261104T154329_681870Z",
+  "run_id": "899fdfaee002fd2b",
+  "git": {
+    "commit": "ce08d3181f9325b82e91b9bb1b1585e10c787ab7",
+    "branch": "exp01-atlas-protocol",
+    "tracked_worktree_dirty": false
+  },
+  "metric_variant": "exp01-quantus-public-0.6.0-v1",
+  "implementation_sha256": "607491892e16bae9b6bb277c7e1b0ae683fef19933e01ef841d2af8d46d25ba1",
+  "backend_execution_sha256": "24b1a68fa955ca392d0678147348536e653b9347d2dfb7eae619c1146582f96b",
+  "counts": {
+    "n_inputs": 4,
+    "repetitions_per_input": 4,
+    "n_planned_scores": 576,
+    "n_attempted_scores": 576,
+    "n_valid_scores": 559,
+    "n_nonfinite_scores": 17,
+    "n_official_finite_scores": 559,
+    "n_analysis_eligible_scores": 555,
+    "n_numerically_unstable_scores": 4,
+    "n_undefined_scores": 17,
+    "n_exception_scores": 0,
+    "n_exceptions": 0,
+    "n_failures_logged": 21,
+    "n_public_FC_calls": 576,
+    "n_public_FE_calls": 12,
+    "n_FE_official_finite": 12,
+    "n_FE_analysis_eligible": 12,
+    "n_FE_numerically_unstable": 0,
+    "n_FE_undefined": 0,
+    "n_trace_checks_passed": 588,
+    "n_pairing_checks_passed": 576,
+    "n_score_parity_passed": 584,
+    "n_score_parity_deferred_near_constant": 4,
+    "n_warning_records": 21
+  },
+  "matches_canonical_cli_bytes": {
+    "scores.csv": true,
+    "population_scores.csv": true,
+    "metric_calls.jsonl": true
+  }
+}

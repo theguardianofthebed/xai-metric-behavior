@@ -1,0 +1,148 @@
+{
+  "atlas_id": "3973d962-747e-45ef-b05c-18dd541358d9",
+  "revision": 13,
+  "instructions_version": 1,
+  "recorded_before_first_exp01r_smoke": true,
+  "scope": "Dataset/preflight revision and numerical/settings choices before the first EXP-01-R smoke; not a confirmation freeze.",
+  "nodes": [
+    {
+      "id": "EXP-01-R",
+      "type": "experiment",
+      "title": {
+        "en": "E1-R — Quantus FC on Adult data and a learned additive model"
+      },
+      "summary": {
+        "en": "Implementation in progress: Adult records, a fixed logistic log-odds model, Captum IG and official Quantus scores separate population FC from sampling error."
+      },
+      "status": "in_progress",
+      "tags": [
+        "implementation_in_progress",
+        "real_data",
+        "quantus_0_6_0",
+        "population_vs_estimator"
+      ],
+      "sections": {
+        "overview": {
+          "en": "A real-data follow-up to EXP-01 using OpenXAI's processed Adult records, one train-fitted additive model and Captum IG. Implementation is now authorized; the smoke protocol is fixed before measurement. Full development and reserved confirmation remain unexecuted."
+        },
+        "details": {
+          "en": "### 1. Question / RQ\n\n**On real Adult records and a fitted additive model, does changing subset size k change population FC, or the finite score estimated from B sampled groups?**\n\nThis extends EXP-01 to real inputs and Captum explanations, addressing RQ-01/RQ-03 under HYP-01's assumptions. Income labels are prediction targets, not ground-truth explanations of why a person earns that income.\n\n### 2. Measurement Contract — what is fixed or varied?\n\n**Dataset:** OpenXAI's processed **Adult Income** has 45,222 person records: 36,177 train and 9,045 test. Six numeric inputs describe age, census sampling weight (`fnlwgt`), education level, capital gain/loss and weekly work hours. Seven binary inputs encode sex, workclass, marital status, occupation, relationship, race and country. The label is **1 = annual income >$50,000; 0 = otherwise**.\n\n**Previous XAI use:** Agarwal et al., *OpenXAI: Towards a Transparent Evaluation of Model Explanations* (NeurIPS 2022), evaluated attribution methods including IG on Adult with logistic regression, reporting faithfulness results in **Table 3, p. 9**. Our Quantus measurement contract is a new experiment, not a reproduction of those scores. [Paper](https://papers.nips.cc/paper/2022/file/65398a0eba88c9b4a1c38ae405b125ef-Paper-Datasets_and_Benchmarks.pdf).\n\n| Item | Frozen smoke rule |\n|---|---|\n| Data source | Author-published CSV snapshot `3665d80`, linked by OpenXAI's official historical loader. Verify exact SHA256, 13-column order and labels. Dataverse V3 download returned 403; byte identity with V3 is **unverified**. |\n| Preprocessing / model | StandardScaler fitted on train only, over all 13 encoded inputs. Fit one scikit-learn 1.9.1 logistic regression: lbfgs, L2 (`l1_ratio=0`), C=1, max_iter=2000, tol=1e-8. Save and reuse the fitted pipeline. |\n| Scalar target / C | Fixed high-income log-odds $g(x)=\\beta^\\top x+c$, including the fitted intercept. Numeric zero baseline in standardized coordinates equals the training means in raw encoded coordinates. |\n| Explanations | Actual Captum 0.9.0 IG: float64, zero baseline, multiply_by_inputs=True, 50 Gauss-Legendre steps. Preserve signs; no abs or attribution normalization. |\n| Primary evaluator / theta | Quantus 0.6.0 public FC / singleton FE. Zero replacement in the original input, official Pearson, no softmax/aggregation. Same recorded shape/precision controls as EXP-01. |\n| Randomness / replication | N=inputs, R=evaluator repeats, B=draws per score. Seed native Quantus calls and verify actual paired masks across candidates/k/B. Split/model/evaluator/analysis seeds: 2026110501/02/03/04. |\n\n### 3. Proposed experiment design and flow\n\n**IG** is the calibration anchor. **A/B** cyclically shift its coordinates by one/two positions, preserving its signed values and norms. They are fixed nonexact controls, not separate XAI methods. A dense model gives no universal A>B ordering: compute each input's population margin and retain either sign and practical ties (0.01).\n\nCheck actual IG against $v_j=\\beta_jx_j$ coordinate by coordinate, and check completeness. Freeze absolute/relative tolerances at **1e-7 / 1e-7** before execution; stop and save discrepancies on failure. Never substitute analytical v for Captum's output.\n\n```text\n[Verify Adult files; reserve test rows; fit on training data]\n                         ↓\n[Save fixed pipeline; generate IG and shifts A/B]\n                         ↓\n[Check IG/reference and permitted exact enumeration]\n                         ↓\n[Quantus FC/FE → actual masks, U/V, scores and failures]\n                         ↓\n[Population vs finite-score graph + error/budget report]\n                         ↓\n[Later: development review → freeze → reserved confirmation]\n```\n\n**Derived:** $FC_{\\mathrm{pop}}(k)=\\mathrm{Corr}_j(a_j,v_j)$ for positive variances and $1\\leq k<13$. Dependence among real features does not break this per-input additive identity. Enumerate actual replacements for the first selected input at allowed k; compare with tolerance **1e-10**. NumPy is only the reference/trace check; reported scores come from Quantus.\n\n**Grid:** smoke N=4, R=4, B={5,25,100}; development N=128, R=20, B={25,100,400}; k={1,5,10,12}. Before measurement, reserve **512 separate test rows and k={2,7,11}**. A fixed test-row permutation assigns reserved rows first, then smoke and development rows. Never replace failed cases. Counts are planning choices, not power estimates. Confirmation remains blocked until its separate model/pipeline/code-bound freeze is implemented and reviewed.\n\n### 4. Latest result — Smoke\n\n**Implementation in progress; no EXP-01-R measurement result yet.** The protocol above is fixed before the first real-data smoke. EXP-01's synthetic smoke is separate.\n\n### 5. Limitations / failure report\n\n| Status / issue | Handling |\n|---|---|\n| **Observed — Dataverse access failed** | HTTP 403 blocked the planned V3 download. Use the explicitly pinned author snapshot referenced by official OpenXAI code; do not claim V3 byte identity. |\n| **Preprocessing / model gate** | Train-only scaler, fixed positive-class orientation and saved pipeline. Stop on convergence or IG/adapter disagreement; keep the failure record. |\n| **Quantus applicability** | Preserve validation exceptions, undefined Pearson and near-constant warnings separately. Do not change signs or pad vectors to bypass validation. |\n| **Encoded-category/OOD limit** | Mean replacement and IG's straight path can leave valid categories or joint support. This tests encoded-coordinate replacement, not causal removal. |\n| **Statistical scope** | Use joint eligibility and equal input weighting; report every attempted call and exclusions. Finite Pearson need not be unbiased or improve monotonically with B. |\n\nOne fitted model does not test training-seed variation. Four smoke inputs cannot establish real-data reliability or held-out success. Near-zero population A/B margins give weak discrimination. Full development and confirmation remain unexecuted.\n\n### 6. What physically implements the design?\n\n| Component | Purpose |\n|---|---|\n| `exp01r_data.py` | Verified downloads, train-only transform/model, reserved rows, actual Captum IG and numerical gate. |\n| `quantus_backend.py` | Official FC/FE with fitted intercept; actual perturbation/Pearson traces and checks. |\n| `exp01r.py` + analysis | Run the grid; retain failures; compare population references, finite errors and A/B margins. |\n| CLI + `EXP-01-R.ipynb` | Same engine, isolated CPU installation, direct RQ graphs and readable result output. |\n\nRun from the `exp01-atlas-protocol` branch after publication:\n\n```bash\npython -m pip install torch==2.10.0 --index-url https://download.pytorch.org/whl/cpu\npython -m pip install -e '.[exp01r]'\npython -m xai_metric_behavior run-real --config configs/exp01r_smoke.yaml --output results/exp01r-smoke\n```\n\nUse an isolated Python environment and a new output directory. [Design / run guide](https://github.com/theguardianofthebed/xai-metric-behavior/blob/exp01-atlas-protocol/docs/EXP-01-R.md). Downloaded dataset files stay in the local cache; model, partition, manifest, explanations, raw scores and traces document the run.\n\n### 7. What insight do we get?\n\n**Separate a fixed population target from sampling-driven score changes on real inputs.** The population/reference graph answers the k question; finite errors and failure counts answer what a limited B actually delivers. An IG-only run would hide much of this behavior because its defined FC is expected to be 1. The shifted controls expose estimation effects without assuming either is universally better.\n\n**Research Learning Summary:** Need → test the mechanism on real inputs. Intuition → Quantus samples different feature groups for one fixed Adult explanation. Definition → compare finite FC with the additive population reference. Reason → fixed log-odds preserves additivity; real data adds preprocessing, numerical and applicability checks.\n"
+        },
+        "evidence": {
+          "en": "**Prior XAI use:** Agarwal et al., OpenXAI (NeurIPS 2022), Table 3 p. 9 evaluates Adult explanations with logistic regression, including IG. This is precedent for the dataset/model family, not our Quantus scores or attribution definition. **Verified data source:** author CSV commit 3665d80f60cdd261ae944fe81b673132f348bed6, linked by the official historical OpenXAI loader. Exact files have 36,177/9,045 rows and 13 inputs; SHA256 values are recorded before measurement. **Preflight change:** Dataverse V3 access returned HTTP 403; the author snapshot is an explicitly chosen source, with V3 byte identity unverified. **Implementation authorized / smoke pending:** the current researcher request supersedes the earlier Atlas-only scope. **Derived:** HYP-01 supplies the conditional per-input population identity."
+        },
+        "easy_explanation": {
+          "en": "First learn a simple income-prediction model from real records. Explain its log-odds with IG, then keep each explanation unchanged while Quantus changes how many features it samples and how often. Because this particular output is additive, we can still calculate the population reference. This lets us study sampling error on real inputs without pretending to know the true human reason for someone's income."
+        }
+      },
+      "sourceRefs": [
+        {
+          "sourceId": "SRC-EXP01R-DISCUSSION-20261104"
+        },
+        {
+          "sourceId": "SRC-OPENXAI-V3-ADULT"
+        },
+        {
+          "sourceId": "SRC-OPENXAI-LOADER-PIN"
+        },
+        {
+          "sourceId": "SRC-CAPTUM-IG"
+        },
+        {
+          "sourceId": "SRC-QUANTUS-PRIMARY-20261104"
+        },
+        {
+          "sourceId": "SRC-QUANTUS-060-FC"
+        },
+        {
+          "sourceId": "SRC-QUANTUS-060-FE"
+        },
+        {
+          "sourceId": "SRC-SCIPY-PEARSON-117"
+        },
+        {
+          "sourceId": "SRC-OPENXAI-MODEL-PIN"
+        },
+        {
+          "sourceId": "REF-BHATT"
+        },
+        {
+          "sourceId": "SRC-OPENXAI-AUTHOR-ADULT-20261105"
+        },
+        {
+          "sourceId": "SRC-OPENXAI-2022-ADULT"
+        }
+      ],
+      "lastModified": "2026-11-04T23:38:35.721Z"
+    },
+    {
+      "id": "RQ-03",
+      "type": "research_question",
+      "title": {
+        "en": "Can a mechanism prediction survive new conditions?"
+      },
+      "summary": {
+        "en": "Test whether our proposed reason for a metric's behavior predicts what happens under reserved conditions."
+      },
+      "status": "in_progress",
+      "tags": [
+        "proposed",
+        "confirmation_question"
+      ],
+      "sections": {
+        "overview": {
+          "en": "- **Who:** The researcher proposes and tests a reason for the metric's behavior.\n- **What:** Predictions about the metric's behavior.\n- **When:** After exploration but before confirmation data are inspected.\n- **Where:** Held-out inputs, settings, model coefficients, and applicable model families.\n- **Why:** An after-the-fact explanation can fit an observation without predicting anything new.\n- **How:** Freeze assumptions and predictions, then evaluate them on new conditions and fresh repetitions."
+        },
+        "details": {
+          "en": "## What does “account” mean here?\n\nAn **account** is a proposed explanation of why the metric behaves as it does. A **mechanism account** identifies the calculation steps thought to produce the behavior, the assumptions under which that reasoning applies, and a prediction we can check. We also call it a **mechanism hypothesis**.\n\nThis is an explanation **of the metric's behavior**. The XAI explanation E is the attribution vector being evaluated. These are separate uses of the word “explanation.”\n\n## Question\n\nCan this mechanism hypothesis predict the metric's response under conditions that were not used to develop or revise it?\n\nFor example, under HYP-01's additive-model and uniform-subset assumptions, the proposed reasoning predicts that population FC is unchanged across admissible subset sizes. A reserved subset size can test that prediction. Finite random estimates need separate uncertainty analysis; the population claim does not say that every sampled score will be identical.\n\n## Confirmation logic\n\nPredictions may concern a population score, an estimator's error or variability, an ordering of two explanations, a trace residual, or a failure boundary. Define what would support or contradict the particular prediction. Use a control that removes the suspected cause when that can be done while preserving other relevant conditions.\n\nFresh random seeds at the same condition provide evidence about repeatability. Conditions withheld from hypothesis development test the prediction's scope. Pairing within a comparison is compatible with fresh randomness across repetitions.\n\n## Allowed conclusion\n\nState the tested conditions, supported mechanism, observed response, and remaining discrepancy. Evidence from a synthetic family supports the stated scope; it does not establish universal metric validity."
+        },
+        "evidence": {
+          "en": "**Research status:** proposed confirmation criterion.\n\n**Justification:** this is a design commitment for falsifiable mechanism testing. Morris et al. provide methodological guidance for explicitly defining simulation aims, data generation, estimands, methods, and performance measures. MetaQuantus and Binder et al. establish relevant prior evaluator and mechanism analyses.\n\n**Future artifact:** a prediction register fixed before the confirmation run, linked to actual outcomes and failures.\n\n**Terminology clarification:** “account” is ordinary research language for a proposed explanation, not a new metric or experimental output. The subset-size illustration refers to the project's conditional HYP-01 derivation and remains a prospective confirmation example."
+        },
+        "easy_explanation": {
+          "en": "A **mechanism account** is our proposed reason for why a metric behaves as it does. It should tell us what to expect before we run a new test. The XAI explanation E is the feature-attribution vector being scored; our reasoning concerns the metric that scores it.\n\nImagine we developed the reasoning using k = 1, 5, 10 and 12, where k means how many features are replaced in one sampled group.\n\n- **Repeat a familiar setting:** keep k=5 and everything else fixed, but draw different random feature groups. This asks: “How much can the score change just because we happened to sample different groups?”\n- **Try a setting we deliberately saved for later:** leave k=7 unused while developing the reasoning. Write down what we expect there, then run it without changing the prediction after seeing the answer. This asks: “Can our reason also predict what happens at a setting it was not adjusted to fit?”\n\nHere the prediction concerns the **population FC**. Individual scores computed from a limited number of groups can still differ. Repeating old settings checks sampling variation; correctly predicting a reserved setting provides additional evidence about the reasoning's scope."
+        }
+      },
+      "sourceRefs": [
+        {
+          "sourceId": "SRC-DESIGN"
+        },
+        {
+          "sourceId": "REF-MORRIS"
+        },
+        {
+          "sourceId": "REF-METAQUANTUS"
+        },
+        {
+          "sourceId": "REF-BINDER"
+        }
+      ],
+      "lastModified": "2026-11-04T23:38:35.721Z"
+    }
+  ],
+  "sources": [
+    {
+      "id": "SRC-OPENXAI-AUTHOR-ADULT-20261105",
+      "title": {
+        "en": "OpenXAI Adult — pinned author CSV snapshot"
+      },
+      "url": "https://github.com/chirag-agarwall/data/tree/3665d80f60cdd261ae944fe81b673132f348bed6",
+      "revision": "3665d80f60cdd261ae944fe81b673132f348bed6",
+      "text": {
+        "en": "The official historical OpenXAI loader at 2cfeece16912a053edc360d137a6aebf97413284 linked chirag126/data (now chirag-agarwall/data). adult-train.csv: 36,177 rows, SHA256 15ffa1eaa8a075ace38f5ec5adcbe93220c7995cf4fe756e1079d80389c76f5a. adult-test.csv: 9,045 rows, SHA256 f01af26113ac6f696697911c29a75375dc3541214646103d694581d05e3e31cc. Six numeric and seven grouped binary inputs plus income label; 1 means >50K, 0 means <=50K. Dataverse V3 download returned HTTP 403 in the execution environment; V3 byte identity is unverified. Download/cache the original author files; do not relabel them as verified V3 or redistribute the complete dataset in this repository."
+      },
+      "lastModified": "2026-11-04T23:38:35.721Z"
+    },
+    {
+      "id": "SRC-OPENXAI-2022-ADULT",
+      "title": {
+        "en": "Agarwal et al. — OpenXAI (NeurIPS 2022), Adult evaluation"
+      },
+      "url": "https://papers.nips.cc/paper/2022/file/65398a0eba88c9b4a1c38ae405b125ef-Paper-Datasets_and_Benchmarks.pdf",
+      "text": {
+        "en": "OpenXAI: Towards a Transparent Evaluation of Model Explanations, NeurIPS 2022 Datasets and Benchmarks. Table 3, p. 9 reports Adult Income with logistic regression for attribution methods including Integrated Gradients and faithfulness metrics; Figure 3, p. 10 analyzes PGU across sex subgroups. These support prior XAI benchmark use of Adult, not a replication of our Quantus FC contract or proof of causal explanation ground truth."
+      },
+      "lastModified": "2026-11-04T23:38:35.721Z"
+    }
+  ]
+}

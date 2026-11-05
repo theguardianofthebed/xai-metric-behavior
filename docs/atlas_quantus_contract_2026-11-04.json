@@ -1,0 +1,260 @@
+{
+  "atlas_id": "3973d962-747e-45ef-b05c-18dd541358d9",
+  "revision": 9,
+  "record_type": "selected_contract_snapshot_not_portable_atlas_export",
+  "note": "Quantus-primary contract after first-smoke numerical-eligibility refinement and before the completed rerun. Current results are reported in docs/EXP-01.md and results/verification/. Other Atlas elements and later content revisions are not represented here.",
+  "atlas": {
+    "slug": "xai-metric-behavior-research",
+    "title": {
+      "en": "XAI Metric Behavior — Framework & Experiments"
+    },
+    "defaultLocale": "en"
+  },
+  "nodes": [
+    {
+      "id": "EXP-01",
+      "type": "experiment",
+      "title": {
+        "en": "E1 — Quantus FC: same explanation, different estimates"
+      },
+      "summary": {
+        "en": "Keep explanations fixed and use Quantus to separate population FC from subset-sampling error."
+      },
+      "status": "in_progress",
+      "tags": [
+        "core",
+        "population_vs_estimator",
+        "proposed_experiment",
+        "sampling",
+        "subset_size"
+      ],
+      "sections": {
+        "overview": {
+          "en": "A controlled Quantus study of Faithfulness Correlation: keep the explanation fixed and vary subset size and sampling budget. Quantus migration and a fresh smoke are in progress; development and confirmation remain pending."
+        },
+        "details": {
+          "en": "### 1. Question / RQ\n\n**If the explanation stays fixed, does replacing more features at once (k) change population FC, or only the finite estimate obtained from B sampled groups?**\n\nThis addresses RQ-01 within RQ-00. Population FC considers every allowed size-k subset for one input; the Quantus estimate uses B sampled subsets. HYP-01 predicts population invariance under the additive contract; finite estimates can fluctuate or be undefined.\n\n### 2. Measurement Contract — what is fixed or varied?\n\n| Item | Rule |\n|---|---|\n| Model / data | 20 independent standard-normal features; $g(x)=2.5x_1-2x_2+1.5x_3+x_4-0.5x_5$. CPU, fixed scalar output. |\n| Explanation meaning: C | Signed zero-relative contributions $v_j=w_jx_j$. Preserve signs; no attribution normalization or probability transform. |\n| Primary evaluator | **Quantus 0.6.0 public FC / singleton FE calls**. Explicit abs=False, normalise=False, return_aggregate=False, softmax=False. |\n| Evaluator rules: theta | Uniform size-k subsets; replace selected features by numeric **0.0 in the original input**. Official baseline replacement and Pearson functions calculate U/V and association. |\n| What changes | k = features per draw; B = draws per FC score. Smoke: k = {1,5,10,19}, B = {5,25,100}, N = 4 inputs, R = 4 repeats. |\n| Randomness: xi | Seed Quantus before each paired call; record actual subsets. Verify identical draws across candidates, nested k prefixes and B prefixes. Preserve native sampling; do not inject masks. |\n| Reporting | Average repeats within each input, then weight inputs equally. Compare jointly eligible repeats; resample inputs for descriptive intervals. Preserve official returns; count undefined and near-constant numerical cases separately. |\n\nUse (N,1,d) input plus model flattening for the pinned tabular compatibility issue. Preserve float64 model inputs and arithmetic through a scoped runtime setting, with restoration afterward. These are declared adapter choices, not modifications to Quantus scoring.\n\n### 3. Proposed experiment design and flow\n\n**Exact:** the true contribution vector. **A:** move contribution 1 to unused feature 6. **B:** also move contribution 2 to unused feature 7. The signed values, sum, sparsity and norms stay fixed; their locations change. Exact checks calibration; A/B expose estimation effects.\n\n```text\n[Fix contract; prepare inputs and Exact / A / B]\n                         ↓\n[Derive population reference; enumerate selected cases]\n                         ↓\n[Call Quantus FC / FE; record actual masks, U, V, scores]\n                         ↓\n[Check paired draws + NumPy trace parity; retain failures]\n                         ↓\n[Compare estimator error and A−B gaps]\n                         ↓\n[Later: development review → freeze → held-out confirmation]\n```\n\n**Derived:** $FC_{\\mathrm{pop}}(k)=\\mathrm{Corr}_j(a_j,v_j)$ for positive variances and $1\\leq k<20$. Enumeration checks the reference using actual replacements; tolerance $10^{-10}$ checks numerical consistency. The A/B population margin is $v_2^2/\\sum_j(v_j-\\bar v)^2\\geq0$; its size varies by input.\n\n**Why NumPy remains:** recomputing correlation from Quantus's recorded U/V and replaying its actual subsets can detect adapter or logging errors. This auxiliary parity check never supplies the reported FC/FE score and does not independently prove metric validity. An upstream NearConstantInputWarning defers strict score parity: retain the official value, warning and discrepancy; exclude it from conditional error/ranking summaries. All input, replacement and trace checks still apply. Analytical/enumeration references answer the population question.\n\nDevelopment: N = 128, R = 20, k = {1,5,10,19}, B = {25,100,400}. Confirmation reserves k = {2,7,13}, N = 512 and fresh streams. These are planning counts, not a power calculation. Freeze the prediction, margins, failure/analysis rules, code/configuration and development provenance before confirmation.\n\n### 4. Latest result — Smoke\n\n**Quantus rerun pending.** The earlier NumPy-primary smoke is superseded and removed from current results. It remains in version history for provenance; it is not evidence that this Quantus implementation has run.\n\n### 5. Limitations / failure report\n\n| Status / issue | Meaning and handling |\n|---|---|\n| **Pending — completed Quantus smoke** | The first attempt stopped at a near-constant Pearson guard; rerun the same seeds after declaring the handling below. |\n| **Expected possible outcome — undefined Pearson** | Constant sampled U or V has no defined correlation. Preserve NaN and the reason; do not score it as zero. |\n| **Observed — near-constant Pearson** | Almost equal U values can produce an unstable finite score. Preserve Quantus's value and warning; label it numerically ineligible, separately from undefined. The first attempt and raw traces are archived. |\n| **Adapter checks required** | Verify channel shape, literal-zero baseline, float64 inputs, native draw coupling and unchanged official functions. |\n| **Unverified — hosted notebook UI** | Prepare a Colab front end to the same engine and state exactly how it was exercised. |\n\nFour synthetic inputs cannot establish real-data transfer, general failure rates or held-out success. Eligible-only summaries are conditional on finite scores without near-constant warnings. This handling was refined during smoke debugging; it is not a prospective confirmation result. The 0.01 practical-tie tolerance is operational, not a validated equivalence margin. Full development and confirmation are unexecuted.\n\n### 6. What physically implements the design?\n\n**Target implementation:** Quantus supplies FC/FE; a thin adapter records its computation. Project code supplies the oracle/candidates, population references, paired analysis, manifests and figures. The CLI and Colab notebook call the same engine. No training, external dataset or GPU is needed.\n\n```bash\npython -m pip install torch==2.10.0 --index-url https://download.pytorch.org/whl/cpu\npython -m pip install -e .\npython -m xai_metric_behavior run --config configs/exp01_smoke.yaml --output results/exp01-smoke\n```\n\nRun from the repository's exp01-atlas-protocol branch after the new implementation is published. Use a new output directory per run. [Design / run guide](https://github.com/theguardianofthebed/xai-metric-behavior/blob/exp01-atlas-protocol/docs/EXP-01.md).\n\n### 7. What insight do we get?\n\n**Separate explanation differences from evaluator sampling effects.** A finite FC of 1 can occur for a nonexact explanation; its meaning depends on k, B, uncertainty and undefined outcomes. This is an invariance study, so DMS/Response Alignment is not used.\n\n**Research Learning Summary:** Need → isolate sampling effects. Intuition → ask Quantus to score the same explanation from different finite samples. Definition → population FC uses all subsets; finite FC uses B draws. Reason → additivity gives a common subset-size factor that cancels in population Pearson; finite samples still vary."
+        },
+        "evidence": {
+          "en": "Bhatt et al. supplies the subset-correlation family; HYP-01 is the project's conditional derivation. Quantus 0.6.0 is the primary evaluator for this protocol. The earlier NumPy-primary smoke is superseded, so new implementation and execution claims require new versioned artifacts. Source inspection alone is not experiment execution. The first public-Quantus attempt stopped on a near-constant-input parity guard. SciPy documents that cancellation can make Pearson inaccurate in this case; raw scores are retained, with a separate analysis-eligibility flag. Fresh completed-smoke evidence remains pending."
+        },
+        "easy_explanation": {
+          "en": "We keep one explanation unchanged and ask the evaluator to inspect different-sized groups of features, more or fewer times. A short sample can give a different score—or no calculable correlation. Knowing the model's exact contributions lets us separate that sampling effect from a change in the explanation."
+        }
+      },
+      "sourceRefs": [
+        {
+          "sourceId": "REF-BHATT"
+        },
+        {
+          "sourceId": "SRC-DESIGN"
+        },
+        {
+          "sourceId": "SRC-QUANTUS-PRIMARY-20261104"
+        },
+        {
+          "sourceId": "SRC-QUANTUS-060-FC"
+        },
+        {
+          "sourceId": "SRC-QUANTUS-060-FE"
+        },
+        {
+          "sourceId": "SRC-SCIPY-PEARSON-117"
+        }
+      ],
+      "lastModified": "2026-11-04T15:35:03.439Z"
+    },
+    {
+      "id": "FW-00",
+      "type": "framework",
+      "title": {
+        "en": "Research map and reading guide"
+      },
+      "summary": {
+        "en": "Start here: the research question guides our choice of measurement rules; the remaining stages prepare, run, and interpret controlled comparisons."
+      },
+      "status": "in_progress",
+      "tags": [
+        "proposed",
+        "entry_point"
+      ],
+      "sections": {
+        "overview": {
+          "en": "- **Who:** The researcher and collaborators.\n- **What:** A navigation and governance map for this research atlas.\n- **When:** Throughout design, execution, and interpretation.\n- **Where:** This atlas and future versioned research artifacts.\n- **Why:** Keep conceptual understanding, formal claims, and evidence distinct.\n- **How:** Read Summary and Overview first, Details for the protocol, Evidence for support, and Easy explanation for interpretation."
+        },
+        "details": {
+          "en": "## What the first arrow means\n\n**RQ -> Measurement contract** means: “Given what we want to learn, the researcher chooses and documents how it will be measured.”\n\nThe research question gives the purpose. It does not automatically produce a unique contract or set numerical parameters. We choose and justify the explanation meaning, metric, output target, baseline, quantities held fixed, and settings varied so that the comparison can answer the question.\n\nFor a question about subset size, for example, the contract states that subset size is varied while the model, input, explanation, and other relevant settings remain fixed. That is an experimental design decision motivated by the question.\n\n## Reading path\n\nThe arrows below show the order of design and investigation.\n\n```text\nResearch question: What do we want to learn?\n       |\n       | Researcher chooses and documents measurement rules\n       v\nMeasurement contract: What is measured, fixed, and varied?\n       |\n       v\nOracle and reference bank: Prepare controlled test cases\n       |\n       v\nMetric evaluation: Calculate scores and keep traces\n       |\n       v\nDiagnosis: Compare results with mechanism predictions\n       |\n       v\nHeld-out confirmation: Test predictions on reserved conditions\n```\n\nDuring exploration, an unsuitable contract may lead us to revise the design or narrow the question. Freeze the applicable contract and predictions before confirmation.\n\n## First scope\n\nBegin with synthetic tabular feature-attribution Faithfulness. EXP-01 studies subset sampling and estimation; EXP-02 studies reference compatibility; EXP-03 studies interactions. EXP-04 and EXP-05 provide representation and placement controls. The framework permits later Compactness and Robustness studies after metric-specific definitions and reference assumptions are established.\n\n## What a box status means\n\n**In-Progress:** this item's research specification or review is still being refined. It does not mean an experiment is running.\n**Finalized:** this item's text or protocol has been explicitly frozen for its stated purpose. It does not imply that a hypothesis is true, a method is universally valid, or an experiment passed.\n**Deprecated:** the item is superseded and retained for provenance.\n\nScientific evidence is stated separately in Evidence/Justification using proposed, derived, observed, implemented, and unverified distinctions. Initial planning items remain In-Progress. Finalization never propagates automatically through links.\n\n## Navigation\n\nConnections express a named direction. A reference citation supplies context or a definition unless the note explicitly identifies a demonstrated result. Warning rules identify missing documentation, missing traces, and inconsistent finalization states; they do not validate scientific truth.\n\n## Evaluator policy\n\nUse a pinned **Quantus framework** as the default execution engine for the Atlas experiments. Report scores from its official metric calls; project adapters enforce the declared contract and record actual traces. NumPy may supply independent analytical references, enumeration and justified parity checks. Clearly label any custom metric variant or exception. A parity match is an implementation check, not a substitute for a Quantus run or proof of general metric validity."
+        },
+        "evidence": {
+          "en": "**Current policy:** Quantus is the intended primary evaluator for most Atlas experiments. EXP-01 is being migrated and rerun; EXP-01-R is a planned real-data follow-up. Other experiment proposals and historical pilot results retain their separate evidence status. Code/execution claims require exact repository artifacts; this map does not itself prove implementation or results."
+        },
+        "easy_explanation": {
+          "en": "The arrow **RQ -> Measurement contract** means:\n\n**“We have a research question. Now we choose and write down measurement rules that let us investigate it.”**\n\nThe RQ tells us what we want to learn. The researcher makes the design choices. The question does not automatically select a metric, baseline, or sample budget, and more than one justified contract may address it.\n\nIf we ask what happens when subset size changes, the contract states which subset sizes we compare and what stays fixed. We then prepare test cases, calculate scores and traces, interpret the results, and check predictions on reserved conditions.\n\nThe flow is the order of that work. It is not a statement that each box mathematically determines the next."
+        }
+      },
+      "sourceRefs": [
+        {
+          "sourceId": "SRC-DESIGN"
+        },
+        {
+          "sourceId": "SRC-STATUS"
+        },
+        {
+          "sourceId": "SRC-PROJECT-INSTRUCTIONS"
+        }
+      ],
+      "lastModified": "2026-11-04T14:53:44.752Z"
+    },
+    {
+      "id": "FW-03",
+      "type": "framework",
+      "title": {
+        "en": "Stage 3 — Metric evaluator with computation traces"
+      },
+      "summary": {
+        "en": "Compute scores while preserving the intermediate selections and quantities that produced them."
+      },
+      "status": "in_progress",
+      "tags": [
+        "proposed",
+        "stage",
+        "trace"
+      ],
+      "sections": {
+        "overview": {
+          "en": "- **Who:** The metric evaluator and trace recorder.\n- **What:** Scores plus intermediate numerical records.\n- **When:** During each evaluation, before diagnosis.\n- **Where:** The controlled model and attribution bank.\n- **Why:** A final score alone cannot identify the mechanism responsible for a change.\n- **How:** Apply the declared intervention, share compatible draws, record quantities and failures, then calculate the score."
+        },
+        "details": {
+          "en": "## Inputs and outputs\nInputs: fixed input x, scalar target g, candidate E, contract C, evaluator settings theta, and controlled primitive randomness. Outputs: per-input scores; raw trace records; exceptions and nonfinite outcomes; and a link to the exact configuration.\n\nExplanation intervention changes E outside the evaluator. Internal input perturbation changes selected coordinates of x to measure model response. These operations must be recorded separately.\n\n## FC trace quantities\nFor a selected subset S and replacement baseline b:\n```math\nU_S=\\sum_{j\\in S}E_j,\\qquad V_S=g(x)-g(x_{S\\leftarrow b}).\n```\nStore S, b, the original and perturbed outputs, U_S, V_S, and any no-change or zero-variance condition. Correlation is computed across subsets within an input; input-level results are aggregated afterward.\n\n## Randomness control\nControl paired randomness before calling the evaluator. Quantus selects its own subsets; record them during computation and verify the intended coupling afterward. This checks a preselected pairing rule, not a post hoc selection of favorable results. Keep new independent streams for replications.\n\n## Implementation boundary\nUse official Quantus metric calls as the default score source. Recording wrappers delegate unchanged to the official perturbation and similarity functions. Adapters must preserve the metric definition. Auxiliary NumPy parity replays observed masks/U/V to catch instrumentation errors; it never replaces the reported score. Do not modify scoring, selection or validation to force a preferred result.\n\n## Numerical eligibility\n\nA finite library return is not automatically stable evidence. Preserve the raw score and warnings. In EXP-01, an upstream NearConstantInputWarning is recorded as numerical instability: it is excluded from conditional error/ranking summaries, while undefined Pearson outcomes are counted separately. Strict score parity is deferred only for that warning; structural trace checks remain mandatory. This smoke-stage rule is frozen before confirmation."
+        },
+        "evidence": {
+          "en": "**Definition source:** FC's U/V comparison follows Bhatt et al., Sec. 3.2. **Implementation policy:** official Quantus metric calls plus transparent recording, with explicit contract checks. **Current status:** the new Quantus EXP-01 pipeline is being implemented; new smoke evidence is pending. Hand-computed cases, degeneracy checks and actual trace parity are implementation guards, not scientific confirmation."
+        },
+        "easy_explanation": {
+          "en": "The evaluator returns both a score and a record of how it obtained that score. For each selected feature subset, it records the attribution sum and the corresponding change in the model output.\n\nThe evaluator selects features according to its sampling rule; the explanation supplies attribution values. Paired draws are prepared before these calculations. Keeping the intermediate records lets us locate the source of a changed result."
+        }
+      },
+      "sourceRefs": [
+        {
+          "sourceId": "SRC-DESIGN"
+        },
+        {
+          "sourceId": "REF-BHATT"
+        },
+        {
+          "sourceId": "SRC-SCIPY-PEARSON-117"
+        }
+      ],
+      "lastModified": "2026-11-04T15:35:03.439Z"
+    },
+    {
+      "id": "SET-03",
+      "type": "experimental_setting",
+      "title": {
+        "en": "Evaluator settings and compatibility"
+      },
+      "summary": {
+        "en": "Make baseline, target, sign handling, subset size, sampling budget, comparator, and aggregation explicit."
+      },
+      "status": "in_progress",
+      "tags": [
+        "proposed",
+        "fixture",
+        "configuration"
+      ],
+      "sections": {
+        "overview": {
+          "en": "- **Who:** The researcher sets conditions; adapters enforce them.\n- **What:** The evaluator configuration theta.\n- **When:** Before a run and whenever a configuration changes.\n- **Where:** All metric calls and stored traces.\n- **Why:** Defaults can change the evaluated quantity or hide incomparable outputs.\n- **How:** Freeze a baseline protocol and declare one-factor or planned factorial changes."
+        },
+        "details": {
+          "en": "## Baseline protocol\nUse a literal numeric zero baseline for the initial additive contribution test. Keep the scalar target fixed, preserve signed attributions for FC and FE, and avoid unannounced absolute-value or normalization preprocessing. Configuration choices for MC are documented separately because its magnitude-oriented comparison serves a different control.\n\n## Conditions\nSubset size k is the number of selected coordinates per draw. Budget B is the number of subset draws used for one input's estimated score. Draw each subset without replacement internally; repeated draws may select the same subset again. Baseline b is fixed for the input and must not depend on the selected subset in tests using the fixed-baseline identity.\n\n## Compatibility check\nSeparate the explanation reference from the evaluator's replacement value. A theta change can preserve the attribution vector while changing the comparison's meaning. Preserve each condition's intended sampling law when pairing.\n\n## Implementation verification\nBefore execution, inspect the pinned library's actual perturbation and similarity functions, signatures, target handling, aggregation behavior, and nonfinite policy. A named baseline or similarity function must not be assumed to implement its everyday meaning.\n\n## Quantus execution policy\n\nPin the release and call its metric object publicly. EXP-01 uses Quantus 0.6.0 FC/FE with `abs=False`, `normalise=False`, `return_aggregate=False`, `softmax=False`, literal `perturb_baseline=0.0`, and FE `features_in_step=1`. Pass a channel axis `(N,1,d)` and flatten inside the scalar model; preserve float64 input arithmetic. Record wrappers and runtime settings explicitly, restore shared RNG/dtype state, and verify actual subsets before claiming pairing. NumPy references and parity have a separate diagnostic role.\n\nDeclare numerical eligibility separately from official returns: retain finite near-constant Pearson values, warnings and parity discrepancies, but exclude those calls from conditional summaries. Preserve undefined outcomes separately; never silently substitute zero or a reference score."
+        },
+        "evidence": {
+          "en": "**Current policy:** explicit Quantus parameters and versioned public-call traces are required. The EXP-01 migration must validate shape, float64 input preservation, deterministic numeric-zero replacement, Pearson comparison, sampling and per-input returns. The completed run's manifest will supply execution evidence; this configuration text alone does not."
+        },
+        "easy_explanation": {
+          "en": "Write the evaluator's settings explicitly. How many features are changed in one draw? How many draws form one score? What values replace those features? Are signs preserved? Which output and comparison function are used?\n\nThese choices tell us what calculation produced the number. A familiar setting name is insufficient: its actual behavior must be checked in the chosen implementation."
+        }
+      },
+      "sourceRefs": [
+        {
+          "sourceId": "SRC-DESIGN"
+        },
+        {
+          "sourceId": "SRC-PROJECT-INSTRUCTIONS"
+        },
+        {
+          "sourceId": "REF-BHATT"
+        },
+        {
+          "sourceId": "SRC-SCIPY-PEARSON-117"
+        }
+      ],
+      "lastModified": "2026-11-04T15:35:03.439Z"
+    },
+    {
+      "id": "CTRL-PAIRING",
+      "type": "control",
+      "title": {
+        "en": "Matched Draws with Preserved Sampling Laws"
+      },
+      "summary": {
+        "en": "Couple comparable metric evaluations through explicit draw plans while preserving each condition’s intended sampling distribution and estimator dependence."
+      },
+      "status": "in_progress",
+      "tags": [
+        "control",
+        "paired-draws",
+        "sampling-law",
+        "variance",
+        "proposed"
+      ],
+      "sections": {
+        "overview": {
+          "en": "- **Who:** Evaluation designer and statistical reviewer.\n- **What:** A shared-randomness control for condition and explanation comparisons.\n- **When:** Draw plans are generated before or during evaluation.\n- **Where:** Inside the metric's stochastic sampling process.\n- **Why:** Unrelated random choices can obscure comparative effects.\n- **How:** Match appropriate random inputs and verify each arm's sampling law."
+        },
+        "details": {
+          "en": "Pairing is an input to evaluation, not a selection of results afterward. With identical subset size and sampling rules, reuse the same sampled feature subsets across comparable explanations or evaluator conditions. Preserve the complete intended draw law in each arm, including within-repetition independence; matching only a marginal subset frequency is insufficient.\n\nFor different subset sizes k, use a common random permutation for each draw and select its first k features. Under uniform permutations, each arm retains uniform size-k subsets, although the subsets are not identical. For different budgets B, use prefixes of a shared independent draw stream. These nested score estimates are dependent and must be analyzed accordingly.\n\nIf selection is explanation-dependent by definition, couple primitive randomness while applying each arm's own selector; imposing identical masks could change the metric. When a valid coupling is unavailable, use an explicitly unpaired comparison with its corresponding uncertainty analysis. A common seed alone does not guarantee matching if execution paths consume randomness differently.\n\n```math\n\\mathrm{Var}(\\widehat M_A-\\widehat M_B)\n=\\mathrm{Var}(\\widehat M_A)+\\mathrm{Var}(\\widehat M_B)\n-2\\mathrm{Cov}(\\widehat M_A,\\widehat M_B).\n```\n\nPositive covariance reduces comparison variance; pairing does not guarantee this in every setting. Use independent plans between repetitions and fresh streams for confirmation, while preserving within-repetition pairing. Record draw identities, coupling rules, and any law violations in the provenance manifest.\n\n## EXP-01 Quantus implementation rule\n\nReset the pinned native sampler's RNG stream per input/repetition before each matched call, then restore external RNG state. Quantus remains responsible for selection. Check the recorded masks for candidate identity and k/B prefix coupling on every run; fail visibly on a mismatch. This scoped seeding is a control input. Matching actual traces is verification, not a replacement sampler or a guarantee that the same seed works across other versions."
+        },
+        "evidence": {
+          "en": "**Proposed control with mathematical justification; no variance reduction observed.** The variance identity is algebraic. Uniform-permutation prefixes yield uniform subsets because every size-k subset has the same number of compatible permutations. The protocol follows the general simulation-design principles of Morris et al., 2019, [doi:10.1002/sim.8086](https://doi.org/10.1002/sim.8086); its concrete coupling is specified in SRC-DESIGN."
+        },
+        "easy_explanation": {
+          "en": "Decide the random evaluation draws before calculating scores. When two settings use the same subset size, they can evaluate corresponding subsets. When sizes differ, one random feature ordering can generate the appropriate prefix for each setting.\n\nThis makes comparisons more directly matched while preserving each setting's sampling rule. It does not guarantee lower variance. Use new independent draw plans between repetitions and record exactly how the pairing worked."
+        }
+      },
+      "sourceRefs": [
+        {
+          "sourceId": "SRC-DESIGN"
+        },
+        {
+          "sourceId": "REF-MORRIS"
+        }
+      ],
+      "lastModified": "2026-11-04T14:53:44.752Z"
+    }
+  ],
+  "sources": [
+    {
+      "id": "SRC-QUANTUS-PRIMARY-20261104",
+      "title": {
+        "en": "Quantus-primary experiment decision — 4 November 2026"
+      },
+      "text": {
+        "en": "The researcher requested that EXP-01 be implemented and rerun through Quantus, with the official framework central to most Atlas experiments. NumPy may remain for auxiliary parity only with justification. The old NumPy-primary current results are superseded. Keep the compact seven-part EXP-01 Details structure, update GitHub/Colab and report a fresh smoke. EXP-01-R is an Atlas-only real-data plan; its GitHub implementation is not requested."
+      },
+      "lastModified": "2026-11-04T14:53:42.732Z"
+    },
+    {
+      "id": "SRC-SCIPY-PEARSON-117",
+      "title": {
+        "en": "SciPy 1.17.0 Pearson warnings and numerical limits"
+      },
+      "url": "https://docs.scipy.org/doc/scipy-1.17.0/reference/generated/scipy.stats.pearsonr.html",
+      "text": {
+        "en": "SciPy documents ConstantInputWarning with undefined correlation/NaN, and NearConstantInputWarning when subtracting the mean can introduce numerical error. EXP-01 keeps the official Quantus return and warning, separates numerical eligibility from finiteness, and retains the diagnostic parity discrepancy. The policy was refined after the first Quantus smoke stopped, before development or reserved confirmation."
+      },
+      "lastModified": "2026-11-04T15:35:01.470Z"
+    }
+  ]
+}

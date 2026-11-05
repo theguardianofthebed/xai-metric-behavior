@@ -1,0 +1,99 @@
+{
+  "experiment_id": "EXP-01-R",
+  "status": "passed",
+  "source_commit": "1b8967b1de1a5300cced2ff01b5167799227cc24",
+  "implementation_sha256": "b5f3d948a2803bafc52a33b36214ed73a98369451b63ac3ed6660d9097f07d42",
+  "canonical_run": "exp01r-smoke",
+  "canonical_run_id": "e6e61e8b575a4f12",
+  "canonical_started_at_utc": "2026-11-04T23:46:32.634764+00:00",
+  "measurement_engine": "Official Quantus 0.6.0 public FC/FE; actual Captum 0.9.0 IG",
+  "tests": {
+    "passed": 42,
+    "failed": 0,
+    "log": "exp01r_tests.txt"
+  },
+  "notebook": {
+    "status": "passed",
+    "code_cells_passed": 5,
+    "key_outputs_byte_identical": 6,
+    "record": "exp01r_notebook_validation.json",
+    "log": "exp01r_notebook_execution.txt",
+    "mode": "All actual code cells, unchanged, shared namespace in an external Python kernel; existing checkout/environment and frozen data/model/partition cache reused."
+  },
+  "visual_review": {
+    "figures_inspected": [
+      "rq_population_vs_estimates.png",
+      "rq_error_vs_budget.png",
+      "rq_population_enumeration.png",
+      "rq_failure_fractions.png"
+    ],
+    "finding": "Legible axes, legends, fixed input selection, reference/finite distinction and denominators; no plot edits after measurement."
+  },
+  "artifact_checks": {
+    "budget_error_matched.csv": true,
+    "contrast_records.csv": true,
+    "contrast_summary.csv": true,
+    "data_manifest.json": true,
+    "exact_enumeration.csv": true,
+    "explanations.npz": true,
+    "failures.csv": true,
+    "figures/rq_error_vs_budget.png": true,
+    "figures/rq_failure_fractions.png": true,
+    "figures/rq_population_enumeration.png": true,
+    "figures/rq_population_vs_estimates.png": true,
+    "ig_checks.csv": true,
+    "input_summary.csv": true,
+    "metric_calls.jsonl": true,
+    "model.json": true,
+    "pairwise_margins.csv": true,
+    "partition.json": true,
+    "population_margins.csv": true,
+    "population_scores.csv": true,
+    "preparation.json": true,
+    "reference_rank_summary.csv": true,
+    "resolved_config.yaml": true,
+    "rq_answer.json": true,
+    "rq_answer.txt": true,
+    "rq_budget_summary.csv": true,
+    "score_summary.csv": true,
+    "scores.csv": true,
+    "traces/FE_call_0000001.npz": true,
+    "traces/FE_call_0000002.npz": true,
+    "traces/FE_call_0000003.npz": true,
+    "traces/FE_call_0000004.npz": true,
+    "traces/FE_call_0000005.npz": true,
+    "traces/FE_call_0000006.npz": true,
+    "traces/FE_call_0000007.npz": true,
+    "traces/FE_call_0000008.npz": true,
+    "traces/FE_call_0000009.npz": true,
+    "traces/FE_call_0000010.npz": true,
+    "traces/FE_call_0000011.npz": true,
+    "traces/FE_call_0000012.npz": true,
+    "traces/input_0000.npz": true,
+    "traces/input_0001.npz": true,
+    "traces/input_0002.npz": true,
+    "traces/input_0003.npz": true
+  },
+  "scientific_scope": "Observed smoke, not confirmation; 4 fixed test records, 1 train-fitted model. Dataset labels are not explanation ground truth.",
+  "reserved_conditions": true,
+  "not_verified": [
+    "Full development",
+    "Reserved confirmation",
+    "Hosted Colab UI",
+    "Fresh EXP-01-R clone/install"
+  ],
+  "read_only_artifact_audit": {
+    "status": "passed",
+    "experiment_rerun": false,
+    "checked": [
+      "43 artifact hashes and protocol/config/model/partition integrity",
+      "576 FC and 12 FE raw-call denominators",
+      "64 input/repetition/k mask-prefix groups",
+      "independent U/V replay, RMSE, reversals and ties",
+      "absence of reserved/development records and reserved k in evaluated artifacts",
+      "notebook hash and six byte-identical outputs"
+    ],
+    "population_enumeration_scope": "first declared smoke input only",
+    "finite_error_scope": "four inputs and four evaluator repetitions; observations are not a general convergence or confirmation claim"
+  }
+}

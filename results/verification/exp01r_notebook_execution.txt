@@ -1,0 +1,349 @@
+EXECUTING NOTEBOOK CELL 2
+Verify experiment pip
+Install CPU PyTorch
+Install Quantus, Captum and EXP-01-R dependencies
+Repository: /workspace/scratch/aa90ee89683c/xai-colab-fix
+Commit: 1b8967b1de1a5300cced2ff01b5167799227cc24
+Notebook Python: 3.13.11
+Experiment interpreter: /workspace/scratch/aa90ee89683c/xai-colab-fix/.venv/bin/python
+{
+  "Python": "3.13.11",
+  "xai-metric-behavior": "0.4.0",
+  "quantus": "0.6.0",
+  "captum": "0.9.0",
+  "scikit-learn": "1.9.1",
+  "torch": "2.10.0+cpu",
+  "numpy": "2.3.5",
+  "scipy": "1.17.0"
+}
+EXECUTING NOTEBOOK CELL 4
+experiment_id: EXP-01-R
+phase: smoke
+dimension: 13
+baseline: 0.0
+n_inputs: 4
+repetitions: 4
+subset_sizes: [1, 5, 10, 12]
+budgets: [5, 25, 100]
+seeds:
+  split: 2026110501
+  model: 2026110502
+  evaluator: 2026110503
+  analysis: 2026110504
+data:
+  dataset: openxai_adult_author_snapshot
+  preprocessing: standard_scaler_train_only
+  confirmation_size: 512
+model:
+  solver: lbfgs
+  C: 1.0
+  l1_ratio: 0.0
+  max_iter: 2000
+  tol: 1.0e-8
+  fit_intercept: true
+  class_weight: null
+ig:
+  n_steps: 50
+  method: gausslegendre
+  multiply_by_inputs: true
+  atol: 1.0e-7
+  rtol: 1.0e-7
+analysis:
+  numerical_tolerance: 1.0e-10
+  practical_tie_tolerance: 0.01
+  bootstrap_resamples: 200
+  confidence: 0.95
+enumeration:
+  enabled: true
+  n_inputs: 1
+  max_subsets: 2000
+write_traces: true
+
+EXECUTING NOTEBOOK CELL 6
+EXP-01-R / SMOKE — direct RQ answer
+On fixed Adult explanations, does subset size k change population FC, or only its finite estimate from B sampled groups?
+
+POPULATION (derived, with independent enumeration):
+Under the stated additive log-odds and uniform-subset contract, the population value is k-invariant (derived). Enumeration tests that identity on the first selected input at allowed k only.
+  Enumeration comparisons with defined references: 12/12.
+  Maximum enumeration/reference error: 1.39e-16.
+  Maximum enumerated population spread across k: 2.22e-16.
+
+FINITE QUANTUS ESTIMATES (observed):
+Quantus scores are finite-sample estimates. Their errors and any reversals below describe this run; a larger B need not improve every individual score.
+  B | RMSE of controls A/B | joint input-repeats across every k/B/control
+    5 | 0.475097 | 16/16
+   25 | 0.157345 | 16/16
+  100 | 0.076164 | 16/16
+  RMSE averages paired repetitions/settings within each input, then gives inputs equal weight.
+  Official FC: 576 attempts; 576 eligible; 0 undefined; 0 near-constant; 0 exceptions.
+  Undefined and near-constant counts are reason incidences and can overlap; raw returns are retained.
+
+PAIRWISE A/B DIAGNOSTIC:
+  k / B | strict reversals / jointly eligible decisive-margin pairs | all attempted pairs
+   1 /   5 | 5/16 | 16
+   1 /  25 | 3/16 | 16
+   1 / 100 | 2/16 | 16
+   5 /   5 | 5/16 | 16
+   5 /  25 | 1/16 | 16
+   5 / 100 | 1/16 | 16
+  10 /   5 | 6/16 | 16
+  10 /  25 | 5/16 | 16
+  10 / 100 | 2/16 | 16
+  12 /   5 | 7/16 | 16
+  12 /  25 | 1/16 | 16
+  12 / 100 | 0/16 | 16
+  Population ties and finite ties remain separate in the CSVs; A>B was never assumed.
+
+SCOPE: observed_smoke_not_confirmation
+One fitted additive model; encoded-coordinate interventions can be off the data support. Labels are income outcomes, not explanation ground truth. No universal metric claim or held-out result.
+
+{
+  "status": "completed",
+  "phase": "smoke",
+  "run_id": "68c07f91f3b00f8f",
+  "output": "/workspace/scratch/aa90ee89683c/xai-colab-fix/results/exp01r-smoke-20261104T234718_911810Z",
+  "counts": {
+    "n_inputs": 4,
+    "repetitions_per_input": 4,
+    "n_planned_scores": 576,
+    "n_attempted_scores": 576,
+    "n_official_finite_scores": 576,
+    "n_analysis_eligible_scores": 576,
+    "n_numerically_unstable_scores": 0,
+    "n_undefined_scores": 0,
+    "n_exception_scores": 0,
+    "n_public_validation_exceptions": 0,
+    "n_fatal_errors": 0,
+    "n_public_FC_calls": 576,
+    "n_public_FE_calls": 12,
+    "n_FE_official_finite": 12,
+    "n_FE_analysis_eligible": 12,
+    "n_FE_numerically_unstable": 0,
+    "n_FE_undefined": 0,
+    "n_FE_exceptions": 0,
+    "n_trace_checks_passed": 588,
+    "n_pairing_checks_passed": 576,
+    "n_score_parity_passed": 588,
+    "n_score_parity_deferred_near_constant": 0,
+    "n_warning_records": 0,
+    "n_failures_logged": 0
+  },
+  "validation": {
+    "reserved_records_evaluated": 0,
+    "reserved_subset_sizes_evaluated": [],
+    "enumeration_comparisons": 12,
+    "enumeration_valid_comparisons": 12,
+    "enumeration_all_checked_consistent": true,
+    "max_enumeration_absolute_error": 1.3877787807814457e-16,
+    "max_singleton_FE_coordinate_error_given_eligible": 2.220446049250313e-16,
+    "enumeration_scope": "first selected record in this phase, allowed k only",
+    "numerical_tolerance": 1e-10,
+    "n_public_calls_without_exception": 588,
+    "all_nonexception_FC_calls_paired": true,
+    "all_nonexception_public_calls_trace_checked": true,
+    "all_nonexception_public_calls_score_parity_classified": true,
+    "max_public_trace_replay_absolute_error_all_diagnostics": 6.661338147750939e-16,
+    "max_stable_public_trace_replay_absolute_error": 6.661338147750939e-16
+  }
+}
+Saved: /workspace/scratch/aa90ee89683c/xai-colab-fix/results/exp01r-smoke-20261104T234718_911810Z
+Elapsed: 11.7 seconds
+EXECUTING NOTEBOOK CELL 8
+EXP-01-R / SMOKE — direct RQ answer
+On fixed Adult explanations, does subset size k change population FC, or only its finite estimate from B sampled groups?
+
+POPULATION (derived, with independent enumeration):
+Under the stated additive log-odds and uniform-subset contract, the population value is k-invariant (derived). Enumeration tests that identity on the first selected input at allowed k only.
+  Enumeration comparisons with defined references: 12/12.
+  Maximum enumeration/reference error: 1.39e-16.
+  Maximum enumerated population spread across k: 2.22e-16.
+
+FINITE QUANTUS ESTIMATES (observed):
+Quantus scores are finite-sample estimates. Their errors and any reversals below describe this run; a larger B need not improve every individual score.
+  B | RMSE of controls A/B | joint input-repeats across every k/B/control
+    5 | 0.475097 | 16/16
+   25 | 0.157345 | 16/16
+  100 | 0.076164 | 16/16
+  RMSE averages paired repetitions/settings within each input, then gives inputs equal weight.
+  Official FC: 576 attempts; 576 eligible; 0 undefined; 0 near-constant; 0 exceptions.
+  Undefined and near-constant counts are reason incidences and can overlap; raw returns are retained.
+
+PAIRWISE A/B DIAGNOSTIC:
+  k / B | strict reversals / jointly eligible decisive-margin pairs | all attempted pairs
+   1 /   5 | 5/16 | 16
+   1 /  25 | 3/16 | 16
+   1 / 100 | 2/16 | 16
+   5 /   5 | 5/16 | 16
+   5 /  25 | 1/16 | 16
+   5 / 100 | 1/16 | 16
+  10 /   5 | 6/16 | 16
+  10 /  25 | 5/16 | 16
+  10 / 100 | 2/16 | 16
+  12 /   5 | 7/16 | 16
+  12 /  25 | 1/16 | 16
+  12 / 100 | 0/16 | 16
+  Population ties and finite ties remain separate in the CSVs; A>B was never assumed.
+
+SCOPE: observed_smoke_not_confirmation
+One fitted additive model; encoded-coordinate interventions can be off the data support. Labels are income outcomes, not explanation ground truth. No universal metric claim or held-out result.
+
+{
+  "status": "completed",
+  "phase": "smoke",
+  "run_id": "68c07f91f3b00f8f",
+  "counts": {
+    "n_inputs": 4,
+    "repetitions_per_input": 4,
+    "n_planned_scores": 576,
+    "n_attempted_scores": 576,
+    "n_official_finite_scores": 576,
+    "n_analysis_eligible_scores": 576,
+    "n_numerically_unstable_scores": 0,
+    "n_undefined_scores": 0,
+    "n_exception_scores": 0,
+    "n_public_validation_exceptions": 0,
+    "n_fatal_errors": 0,
+    "n_public_FC_calls": 576,
+    "n_public_FE_calls": 12,
+    "n_FE_official_finite": 12,
+    "n_FE_analysis_eligible": 12,
+    "n_FE_numerically_unstable": 0,
+    "n_FE_undefined": 0,
+    "n_FE_exceptions": 0,
+    "n_trace_checks_passed": 588,
+    "n_pairing_checks_passed": 576,
+    "n_score_parity_passed": 588,
+    "n_score_parity_deferred_near_constant": 0,
+    "n_warning_records": 0,
+    "n_failures_logged": 0
+  },
+  "validation": {
+    "reserved_records_evaluated": 0,
+    "reserved_subset_sizes_evaluated": [],
+    "enumeration_comparisons": 12,
+    "enumeration_valid_comparisons": 12,
+    "enumeration_all_checked_consistent": true,
+    "max_enumeration_absolute_error": 1.3877787807814457e-16,
+    "max_singleton_FE_coordinate_error_given_eligible": 2.220446049250313e-16,
+    "enumeration_scope": "first selected record in this phase, allowed k only",
+    "numerical_tolerance": 1e-10,
+    "n_public_calls_without_exception": 588,
+    "all_nonexception_FC_calls_paired": true,
+    "all_nonexception_public_calls_trace_checked": true,
+    "all_nonexception_public_calls_score_parity_classified": true,
+    "max_public_trace_replay_absolute_error_all_diagnostics": 6.661338147750939e-16,
+    "max_stable_public_trace_replay_absolute_error": 6.661338147750939e-16
+  }
+}
+<IPython.core.display.Markdown object>
+<IPython.core.display.Image object>
+<IPython.core.display.Markdown object>
+<IPython.core.display.Image object>
+<IPython.core.display.Markdown object>
+<IPython.core.display.Image object>
+<IPython.core.display.Markdown object>
+<IPython.core.display.Image object>
+EXECUTING NOTEBOOK CELL 10
+data_manifest.json saved
+model.json saved
+partition.json saved
+
+ig_checks.csv: 4 rows; first 3:
+{'input_id': '0', 'max_coordinate_absolute_error': '1.1025291790645042e-09', 'max_coordinate_bound_ratio': '0.004275950543259531', 'coordinate_gate_passed': 'True', 'captum_completeness_delta': '1.0915996995208843e-09', 'recomputed_completeness_delta': '1.0915996995208843e-09', 'completeness_bound': '2.562794193614108e-07', 'completeness_gate_passed': 'True', 'delta_agreement_passed': 'True', 'passed': 'True', 'row_id': '7930', 'logit_adapter_absolute_error': '8.881784197001252e-16', 'adapter_gate_passed': 'True'}
+{'input_id': '1', 'max_coordinate_absolute_error': '9.672231904289674e-10', 'max_coordinate_bound_ratio': '0.004055901083665741', 'coordinate_gate_passed': 'True', 'captum_completeness_delta': '-8.660210326638662e-10', 'recomputed_completeness_delta': '-8.660210326638662e-10', 'completeness_bound': '2.239843679637281e-07', 'completeness_gate_passed': 'True', 'delta_agreement_passed': 'True', 'passed': 'True', 'row_id': '7803', 'logit_adapter_absolute_error': '0.0', 'adapter_gate_passed': 'True'}
+{'input_id': '2', 'max_coordinate_absolute_error': '1.1025291790645042e-09', 'max_coordinate_bound_ratio': '0.004275950543259531', 'coordinate_gate_passed': 'True', 'captum_completeness_delta': '9.195162409270097e-10', 'recomputed_completeness_delta': '9.195164629716146e-10', 'completeness_bound': '2.3164311721719574e-07', 'completeness_gate_passed': 'True', 'delta_agreement_passed': 'True', 'passed': 'True', 'row_id': '2924', 'logit_adapter_absolute_error': '4.440892098500626e-16', 'adapter_gate_passed': 'True'}
+
+failures.csv: 0 rows; first 3:
+
+scores.csv: 576 rows; first 3:
+{'input_id': '0', 'source_test_row_id': '7930', 'repetition': '0', 'k': '12', 'budget': '100', 'explanation': 'IG', 'score': '1.0', 'population_score': '0.9999999999999998', 'error': '2.220446049250313e-16', 'valid': 'True', 'analysis_eligible': 'True', 'numerical_instability': 'False', 'reason': 'valid', 'exception': '', 'exception_stage': '', 'score_source': 'quantus.FaithfulnessCorrelation.__call__'}
+{'input_id': '0', 'source_test_row_id': '7930', 'repetition': '0', 'k': '12', 'budget': '100', 'explanation': 'A', 'score': '-0.04720788159122479', 'population_score': '-0.10901412016989404', 'error': '0.061806238578669244', 'valid': 'True', 'analysis_eligible': 'True', 'numerical_instability': 'False', 'reason': 'valid', 'exception': '', 'exception_stage': '', 'score_source': 'quantus.FaithfulnessCorrelation.__call__'}
+{'input_id': '0', 'source_test_row_id': '7930', 'repetition': '0', 'k': '12', 'budget': '100', 'explanation': 'B', 'score': '-0.2707562017456255', 'population_score': '-0.21228477451288078', 'error': '-0.058471427232744705', 'valid': 'True', 'analysis_eligible': 'True', 'numerical_instability': 'False', 'reason': 'valid', 'exception': '', 'exception_stage': '', 'score_source': 'quantus.FaithfulnessCorrelation.__call__'}
+
+Keep: /workspace/scratch/aa90ee89683c/xai-colab-fix/results/exp01r-smoke-20261104T234718_911810Z
+Fitted model cache: /workspace/scratch/aa90ee89683c/xai-colab-fix/data/cache/openxai-adult
+{
+  "notebook": "notebooks/EXP-01-R.ipynb",
+  "notebook_sha256": "54466a25c265f2a55d131b09deafb1ed7fc66d96438d6895442950acc36f296c",
+  "validation_mode": "All actual code cells, unchanged, shared namespace in an external Python kernel; existing checkout/environment and frozen data/model/partition cache reused.",
+  "hosted_colab_ui_verified": false,
+  "fresh_clone_path_verified_in_this_check": false,
+  "fresh_environment_bootstrap_verified_in_this_check": false,
+  "kernel_python": "3.13.11 (main, Jan 28 2026, 00:01:45) [Clang 21.1.4 ]",
+  "cells": [
+    {
+      "index": 2,
+      "status": "passed",
+      "seconds": 2.6519121490000543
+    },
+    {
+      "index": 4,
+      "status": "passed",
+      "seconds": 0.00022646100023848703
+    },
+    {
+      "index": 6,
+      "status": "passed",
+      "seconds": 11.728058860999681
+    },
+    {
+      "index": 8,
+      "status": "passed",
+      "seconds": 0.045378685999821755
+    },
+    {
+      "index": 10,
+      "status": "passed",
+      "seconds": 0.002616672999920411
+    }
+  ],
+  "status": "passed",
+  "replay_output": "results/exp01r-smoke-20261104T234718_911810Z",
+  "replay_run_id": "68c07f91f3b00f8f",
+  "replay_status": "completed",
+  "source_git": {
+    "commit": "1b8967b1de1a5300cced2ff01b5167799227cc24",
+    "branch": "exp01-atlas-protocol",
+    "tracked_worktree_dirty": false
+  },
+  "model_reused": true,
+  "canonical_comparisons": [
+    {
+      "file": "scores.csv",
+      "canonical_sha256": "79518f93c1709e00fad2ebcfdd9159e79ae51679df2b44a38440b31b25d107e2",
+      "replay_sha256": "79518f93c1709e00fad2ebcfdd9159e79ae51679df2b44a38440b31b25d107e2",
+      "byte_identical": true
+    },
+    {
+      "file": "population_scores.csv",
+      "canonical_sha256": "68c842803b3a295c3cda4f58b013e8370dd56a4303bd5ba6757095f1e38aa6f4",
+      "replay_sha256": "68c842803b3a295c3cda4f58b013e8370dd56a4303bd5ba6757095f1e38aa6f4",
+      "byte_identical": true
+    },
+    {
+      "file": "exact_enumeration.csv",
+      "canonical_sha256": "dfcce01cd2b48ab038ef715e914dd1a3c87a7f0557db80e82b4bc3a9d6a572cf",
+      "replay_sha256": "dfcce01cd2b48ab038ef715e914dd1a3c87a7f0557db80e82b4bc3a9d6a572cf",
+      "byte_identical": true
+    },
+    {
+      "file": "ig_checks.csv",
+      "canonical_sha256": "3749e4ad707ca4922e49b9ca4e0964d2993ca2ba6b52f6231f1ec316502c961c",
+      "replay_sha256": "3749e4ad707ca4922e49b9ca4e0964d2993ca2ba6b52f6231f1ec316502c961c",
+      "byte_identical": true
+    },
+    {
+      "file": "rq_answer.json",
+      "canonical_sha256": "4c20473b577add82bf70f995e3778d6490b536700ea1539d25d2acc8de3a1840",
+      "replay_sha256": "4c20473b577add82bf70f995e3778d6490b536700ea1539d25d2acc8de3a1840",
+      "byte_identical": true
+    },
+    {
+      "file": "rq_answer.txt",
+      "canonical_sha256": "d3f1b9befa5e46baa3c5e8a34da78abe2a26a003cc7196c8b9c755130862d1a8",
+      "replay_sha256": "d3f1b9befa5e46baa3c5e8a34da78abe2a26a003cc7196c8b9c755130862d1a8",
+      "byte_identical": true
+    }
+  ]
+}

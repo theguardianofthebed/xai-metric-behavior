@@ -1,0 +1,56 @@
+/workspace/scratch/c37576c9942b/xai-metric-behavior/.venv313/lib/python3.13/site-packages/quantus/metrics/robustness/relative_input_stability.py:47: SyntaxWarning: invalid escape sequence '\e'
+  {max (||\\frac{x - x'}{x}||_p, \epsilon_{min})}`
+/workspace/scratch/c37576c9942b/xai-metric-behavior/.venv313/lib/python3.13/site-packages/quantus/metrics/robustness/relative_output_stability.py:47: SyntaxWarning: invalid escape sequence '\e'
+  {max (||h(x) - h(x')||_p, \epsilon_{min})}`,
+/workspace/scratch/c37576c9942b/xai-metric-behavior/.venv313/lib/python3.13/site-packages/quantus/metrics/robustness/relative_representation_stability.py:48: SyntaxWarning: invalid escape sequence '\e'
+  {max (||\\frac{L_x - L_{x'}}{L_x}||_p, \epsilon_{min})},`
+{
+  "status": "completed",
+  "phase": "smoke",
+  "run_id": "57e892c0015f85e5",
+  "output": "/workspace/scratch/c37576c9942b/xai-metric-behavior/results/colab-cli-after-fix",
+  "counts": {
+    "n_inputs": 4,
+    "repetitions_per_input": 4,
+    "n_planned_scores": 576,
+    "n_attempted_scores": 576,
+    "n_valid_scores": 559,
+    "n_nonfinite_scores": 17,
+    "n_official_finite_scores": 559,
+    "n_analysis_eligible_scores": 555,
+    "n_numerically_unstable_scores": 4,
+    "n_undefined_scores": 17,
+    "n_exception_scores": 0,
+    "n_exceptions": 0,
+    "n_failures_logged": 21,
+    "n_public_FC_calls": 576,
+    "n_public_FE_calls": 12,
+    "n_FE_official_finite": 12,
+    "n_FE_analysis_eligible": 12,
+    "n_FE_numerically_unstable": 0,
+    "n_FE_undefined": 0,
+    "n_trace_checks_passed": 588,
+    "n_pairing_checks_passed": 576,
+    "n_score_parity_passed": 584,
+    "n_score_parity_deferred_near_constant": 4,
+    "n_warning_records": 21
+  },
+  "validation": {
+    "enumeration_comparisons": 16,
+    "enumeration_all_passed": true,
+    "max_enumeration_absolute_error": 5.329070518200751e-15,
+    "max_singleton_FE_coordinate_error_eligible_inputs": 3.3306690738754696e-16,
+    "max_singleton_FE_coordinate_error_all_finite": 3.3306690738754696e-16,
+    "max_fixed_pair_margin_identity_error": 6.661338147750939e-16,
+    "numerical_tolerance": 1e-10,
+    "d20_enumeration_scope": "first input at configured subset sizes only",
+    "max_eligible_exact_anchor_error": 5.551115123125783e-16,
+    "max_public_trace_replay_absolute_error_all_diagnostics": 0.058028876269677176,
+    "max_stable_public_trace_replay_absolute_error": 1.1102230246251565e-15,
+    "actual_pairing_checks": 576,
+    "all_FC_calls_paired": true,
+    "public_FE_calls": 12,
+    "all_public_calls_trace_checked": true,
+    "all_public_calls_score_parity_classified": true
+  }
+}

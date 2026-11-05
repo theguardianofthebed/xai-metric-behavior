@@ -1,0 +1,60 @@
+{
+  "dataset": "openxai_adult_author_snapshot",
+  "snapshot_commit": "3665d80f60cdd261ae944fe81b673132f348bed6",
+  "snapshot_date": "2022-04-11",
+  "features": [
+    "age",
+    "fnlwgt",
+    "education-num",
+    "capital-gain",
+    "capital-loss",
+    "hours-per-week",
+    "sex_Male",
+    "workclass_Private",
+    "marital-status_Non-Married",
+    "occupation_Other",
+    "relationship_Non-Husband",
+    "race_White",
+    "native-country_US"
+  ],
+  "label": "income",
+  "label_mapping": {
+    "0": "income <=50K",
+    "1": "income >50K"
+  },
+  "files": {
+    "train": {
+      "url": "https://raw.githubusercontent.com/chirag-agarwall/data/3665d80f60cdd261ae944fe81b673132f348bed6/adult-train.csv",
+      "sha256": "15ffa1eaa8a075ace38f5ec5adcbe93220c7995cf4fe756e1079d80389c76f5a",
+      "bytes": 1294463,
+      "rows": 36177
+    },
+    "test": {
+      "url": "https://raw.githubusercontent.com/chirag-agarwall/data/3665d80f60cdd261ae944fe81b673132f348bed6/adult-test.csv",
+      "sha256": "f01af26113ac6f696697911c29a75375dc3541214646103d694581d05e3e31cc",
+      "bytes": 323905,
+      "rows": 9045
+    }
+  },
+  "author_source_justification": {
+    "official_loader": "https://github.com/AI4LIFE-GROUP/OpenXAI/blob/2cfeece16912a053edc360d137a6aebf97413284/openxai/dataloader.py",
+    "historical_author_url": "https://raw.githubusercontent.com/chirag126/data/main/",
+    "current_canonical_repository": "https://github.com/chirag-agarwall/data"
+  },
+  "preflight_source_revision": {
+    "planned_source": "OpenXAI Dataverse V3, DOI 10.7910/DVN/HIBCFL",
+    "observed_access_issue": "Dataverse metadata/download returned HTTP 403 during preflight.",
+    "decision": "Use this explicitly pinned author snapshot, before training or scoring.",
+    "dataverse_v3_byte_identity_verified": false
+  },
+  "license_note": "Author CSV repository has no LICENSE file; do not relabel it as Dataverse CC0. Cite OpenXAI and the UCI Adult origin.",
+  "published_split_limit": "Distinct test-row IDs need not be distinct encoded patterns; the published train/test split contains duplicate patterns. No unseen-pattern generalization claim is made.",
+  "schema_checks": {
+    "train_rows": 36177,
+    "test_rows": 9045,
+    "numeric_features": 6,
+    "binary_features": 7,
+    "missing_or_nonfinite_cells": 0,
+    "column_order_verified": true
+  }
+}

@@ -1,3 +1,36 @@
-Generated runs live here and are ignored by Git by default.
+# Experiment outputs
 
-Commit only selected result snapshots that you intend to present through Streamlit.
+Each run writes to a **new directory**. Keep its configuration, code/dependency provenance, inputs, returned metric scores, actual draw traces, failures and summaries together.
+
+## Current evidence
+
+**EXP-01-R:** [`verification/exp01r-smoke/`](verification/exp01r-smoke/) contains completed run `e6e61e8b575a4f12`, from clean source [`1b8967b`](https://github.com/theguardianofthebed/xai-metric-behavior/commit/1b8967b1de1a5300cced2ff01b5167799227cc24). All 576 official FC and 12 FE calls were eligible, with zero warnings, undefined scores or exceptions. Read [`rq_answer.txt`](verification/exp01r-smoke/rq_answer.txt) and its four [figures](verification/exp01r-smoke/figures/) for the direct RQ answer. The author dataset is identified by commit and hashes; full downloaded CSVs stay outside Git. `model.json`, `partition.json`, `explanations.npz` and `ig_checks.csv` document the fitted pipeline and actual Captum outputs.
+
+The R notebook replay reused the checkout/environment/model/reservation and matched six key files byte-for-byte. All 42 tests passed. See [verification](verification/exp01r_validation.json), [test log](verification/exp01r_tests.txt) and [notebook record](verification/exp01r_notebook_validation.json). Hosted Colab and a fresh R clone/install are unverified. Neither development nor reserved confirmation ran.
+
+**EXP-01:** [`verification/smoke/`](verification/smoke/) contains the synthetic Quantus run `0221db61739ed30a`, from clean source [`ce08d31`](https://github.com/theguardianofthebed/xai-metric-behavior/commit/ce08d3181f9325b82e91b9bb1b1585e10c787ab7). Its 576 FC attempts include 559 finite returns (555 eligible, 4 near-constant), 17 undefined and 0 exceptions. All 12 singleton FE returns are eligible.
+
+The test/audit records and notebook replays verify implementation; they are not additional research results. The original replay reused an existing environment ([summary.json](verification/summary.json)). After the reported Colab `venv` failure, [fresh setup verification](verification/colab_setup_validation_2026-11-05.json) passed missing-`ensurepip` creation/recovery/reuse and all five notebook cells with a newly installed Python 3.13.11 experiment environment. The three key output files again matched canonical smoke byte-for-byte. Hosted Colab/interactive Jupyter and the notebook clone path remain unverified. Full development and confirmation remain unexecuted.
+
+Normal smoke/development/confirmation output directories are ignored by Git because full traces can be large. Publish complete versioned run directories when sharing a study; a plot alone cannot reconstruct the calculation. Keep the frozen prediction file with confirmation outputs.
+
+## Read a run
+
+| Files | Purpose |
+|---|---|
+| `manifest.json`, `resolved_config.yaml` | Run status, measurement engine, resolved rules, versions, hashes and random streams. |
+| `scores.csv`, `failures.csv` | Every official FC score; `valid` means finite, while `analysis_eligible` excludes undefined/exception and warned near-constant cases. Preserve `numerical_instability` and reasons. |
+| `metric_calls.jsonl` | Every FC/FE public attempt: returned score, checks, warnings, hashes and pairing outcome. |
+| `traces/`, `inputs.npz` | Generated inputs; FC `input_*.npz` records `subsets_k*`, U/V and outputs. Separate `FE_input_*.npz` files retain singleton order and actual model inputs. |
+| `population_scores.csv`, `exact_enumeration.csv` | Auxiliary analytical references, singleton checks and declared exhaustive comparisons. |
+| `input_summary.csv`, `score_summary.csv` | Eligible within-input/equal-weight summaries; separate finite, eligible, undefined, numerical-instability, exception and total-ineligible counts. |
+| `pairwise_margins.csv`, `contrast_records.csv`, `contrast_summary.csv` | A/B margins, joint eligibility and paired condition comparisons. |
+| `figures/` | Population check, eligible estimation error and `analysis_ineligible_fraction.png`; separate undefined/numerical-instability panels use all attempts. |
+
+Reason counts are incidences and may overlap; `n_ineligible` counts their union. Conditional summaries use `*_given_eligible` or `*_given_joint_eligible`, with pairing preserved.
+
+## Historical evidence
+
+The previous NumPy-primary verification is preserved unchanged in [archive/exp01-numpy/verification](../archive/exp01-numpy/verification/). Its results describe that earlier implementation, not the new Quantus run. Do not combine or relabel the two evidence sets. The original Phase 1 scaffold remains separately archived.
+
+The [first Quantus attempt](../archive/exp01-quantus-first-attempt/) is also unchanged: its near-constant warning exposed the overly strict auxiliary parity guard. It is a failure record, not the latest completed smoke.

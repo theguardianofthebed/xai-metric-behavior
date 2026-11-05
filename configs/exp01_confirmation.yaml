@@ -1,0 +1,25 @@
+experiment_id: EXP-01
+phase: confirmation
+dimension: 20
+weights: [2.5, -2.0, 1.5, 1.0, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+baseline: 0.0
+# Reserved settings. Run only after development and the explicit freeze command.
+# These computational amounts do not guarantee statistical power or coverage.
+n_inputs: 512
+repetitions: 20
+subset_sizes: [2, 7, 13]
+budgets: [25, 100, 400]
+seeds:
+  inputs: 2026110421
+  evaluator: 2026110422
+  analysis: 2026110423
+analysis:
+  numerical_tolerance: 1.0e-10
+  practical_tie_tolerance: 0.01
+  bootstrap_resamples: 1000
+  confidence: 0.95
+enumeration:
+  enabled: true
+  n_inputs: 1
+  max_subsets: 250000
+write_traces: true

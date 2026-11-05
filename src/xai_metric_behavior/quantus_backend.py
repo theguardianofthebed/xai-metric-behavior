@@ -21,6 +21,7 @@ import quantus
 import torch
 from quantus.functions.perturb_func import batch_baseline_replacement_by_indices
 from quantus.functions.similarity_func import correlation_pearson
+from quantus.helpers.model.pytorch_model import PyTorchModel
 
 from .core import checked_pearson
 
@@ -64,6 +65,7 @@ def backend_provenance() -> dict[str, Any]:
             "precision": "CPU float64; scoped torch.set_default_dtype(torch.float64); original dtype restored in finally",
             "rng": "Scoped legacy NumPy MT19937; original state restored in finally; serialized by a process-local RLock",
             "thread_contract": "Run this experiment serially; unrelated threads must not mutate NumPy global RNG or Torch default dtype.",
+            "model_cache_lifecycle": "Clear pinned PyTorchModel introspection caches when each locked public-call context exits; official returns and extracted traces are unchanged.",
             "score_source": "Actual public metric(...) return, never replaced by a reference calculation"}
 
 
@@ -71,11 +73,27 @@ def evaluator_seed_words(root: int, phase: int, input_id: int, repetition: int) 
     return np.random.SeedSequence([root, phase, input_id, repetition]).generate_state(4, dtype=np.uint32)
 
 
+def _release_quantus_model_caches() -> None:
+    """Release wrapper references held by the pinned upstream metadata caches.
+
+    Quantus 0.6.0 decorates these instance methods with unbounded ``lru_cache``.
+    Their ``self`` keys retain every fresh wrapper, our model, and its prediction
+    logs after a metric call. Clearing cache entries does not change either
+    method, the official calculation, or the extracted trace. The pinned source
+    audit verifies the private methods we depend on. Call only while holding
+    ``_QUANTUS_LOCK``, after the public-call body (also on exceptions).
+    """
+    PyTorchModel._get_last_softmax_layer_index.cache_clear()
+    PyTorchModel._get_model_with_linear_top.cache_clear()
+
+
 @contextmanager
 def quantus_call_context(seed_words: np.ndarray) -> Iterator[None]:
     """Quantus uses the legacy global RNG and torch.Tensor uses default dtype.
 
     Set both through supported APIs, restore even on failure, serialize our calls.
+    Release cached wrapper references before releasing the lock. Local model
+    variables remain available to extract exception traces after context exit.
     No Quantus method, sampler, validator, or input array is patched.
     """
     with _QUANTUS_LOCK:
@@ -85,8 +103,11 @@ def quantus_call_context(seed_words: np.ndarray) -> Iterator[None]:
             torch.set_default_dtype(torch.float64)
             yield
         finally:
-            np.random.set_state(state)
-            torch.set_default_dtype(dtype)
+            try:
+                _release_quantus_model_caches()
+            finally:
+                np.random.set_state(state)
+                torch.set_default_dtype(dtype)
 
 
 class ScalarLogitModel(torch.nn.Module):

@@ -33,6 +33,8 @@ FE sorts observations by attribution, but singleton replacement changes only the
 
 The scoped RNG/dtype controls belong to serial execution; they are not a guarantee for concurrent calls sharing process-global state.
 
+**Model lifetime (development memory repair, 5 November 2026).** The pinned [PyTorch wrapper][torch-wrapper] keeps unbounded caches keyed by each wrapper instance. Our fresh recording model per call therefore remained reachable, including its prediction logs, and the first development attempt exceeded an 8-GiB memory limit. The adapter now clears those two introspection caches when the locked call context exits, including exceptions. It leaves Quantus source, sampling, metric arguments, official returns and extracted traces unchanged; RNG/dtype restoration still runs even if cleanup fails. This releases references rather than deleting trace data. [Reproduction and validation](../results/verification/quantus_memory_validation_2026-11-05.json).
+
 ## 3. Traces, references and parity answer different questions
 
 Recording wrappers delegate to the official replacement and Pearson functions. They retain the selected coordinates, original/replaced inputs, U/V passed to Pearson, and the returned score. Actual model calls provide prediction traces. Quantus remains responsible for the metric calculation and returned value.
